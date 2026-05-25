@@ -476,9 +476,32 @@ function showAuthScreen(){
       ❄️ 突撃！
     </button>
     <div id="pw-err" style="color:#f85149;font-size:13px;margin-top:10px;min-height:18px;text-shadow:0 0 8px rgba(0,0,0,1)"></div>
+    <button onclick="switchToSVS()"
+      style="width:100%;height:42px;background:rgba(13,17,23,0.75);border:1.5px solid #2f81f7;border-radius:10px;color:#58a6ff;font-size:14px;font-weight:600;cursor:pointer;margin-top:14px;-webkit-appearance:none;touch-action:manipulation;">
+      ⚔️ SVSモードへ
+    </button>
   `;
   document.body.appendChild(div);
   setTimeout(()=>document.getElementById('pw-input')?.focus(),300);
+}
+
+function switchToSVS(){
+  document.getElementById('auth-screen')?.remove();
+  document.getElementById('auth-bg')?.remove();
+  const vwrap=document.createElement('div');
+  vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
+  const vid=document.createElement('video');
+  vid.src=REPO+'switch_to_svs.mp4';
+  vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
+  vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');
+  vid.muted=false;
+  const goSVS=()=>{
+    vwrap.style.transition='opacity 0.4s';vwrap.style.opacity='0';
+    setTimeout(()=>{vwrap.remove();window.location.href='https://kekj12kek-sudo.github.io/svs-app/svs_app.html';},400);
+  };
+  vid.onended=goSVS;vid.onerror=goSVS;
+  vwrap.appendChild(vid);document.body.appendChild(vwrap);
+  vid.play().catch(goSVS);
 }
 
 function startVideo(){
