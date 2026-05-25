@@ -5,52 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>突撃くん</title>
 <style>
-/* ===== 共通 ===== */
-:root{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
-  --border:#30363d;--border2:#484f58;
-  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
-  --accent:#2f81f7;--accent2:#1f6feb;
-  --green:#3fb950;--red:#f85149;--orange:#e3b341;--purple:#a371f7;
-  --ice:#7dd3fc;--ice2:#38b6ff;
-  --btn-h:48px;--radius:8px;--radius-lg:12px;
-}
+/* ============ 共通 ============ */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--text);font-family:'Hiragino Kana','Hiragino Sans','Yu Gothic',sans-serif;font-size:14px;overscroll-behavior:none}
+body{color:#e6edf3;font-family:'Hiragino Kana','Hiragino Sans','Yu Gothic',sans-serif;font-size:14px;overscroll-behavior:none}
+body.mode-svs{background:#0d1117}
+body.mode-frost{background:#060d1a}
 
-/* ===== モード別テーマ ===== */
-body.mode-frost{
-  --bg:#060d1a;--bg2:#0d1829;--bg3:#142035;--bg4:#1c2e47;
-  --border:#1c3050;--border2:#2a4570;
-  --text:#e0eeff;--text2:#7a9cc0;--text3:#4a6a90;
-  --accent:#38b6ff;--accent2:#0e8fd4;
-}
+/* SVS カラー */
+.svs-mode{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;--border:#30363d;--border2:#484f58;--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--accent:#2f81f7;--accent2:#1f6feb;--green:#3fb950;--red:#f85149;--orange:#e3b341;--purple:#a371f7;--hi:#58a6ff;}
+/* 霜竜 カラー */
+.frost-mode{--bg:#060d1a;--bg2:#0d1829;--bg3:#142035;--bg4:#1c2e47;--border:#1c3050;--border2:#2a4570;--text:#e0eeff;--text2:#7a9cc0;--text3:#4a6a90;--accent:#38b6ff;--accent2:#0e8fd4;--green:#3fb950;--red:#f85149;--orange:#e3b341;--purple:#a371f7;--hi:#7dd3fc;}
 
-#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:none;flex-direction:column;background:var(--bg)}
 .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 12px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
-.header-title{font-size:15px;font-weight:700;color:var(--accent)}
-.mode-frost .header-title{color:var(--ice)}
+.header-title{font-size:15px;font-weight:700;color:var(--hi)}
 .tab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
 .tab-bar::-webkit-scrollbar{display:none}
-.tab{flex:1;min-width:55px;padding:10px 4px;text-align:center;font-size:11px;color:var(--text2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tab{flex:1;min-width:50px;padding:10px 4px;text-align:center;font-size:11px;color:var(--text2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.mode-frost .tab.active{color:var(--ice);border-bottom-color:var(--ice)}
 .content{flex:1;padding:12px;overflow-y:auto}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;margin-bottom:10px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
 .sec{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.btn{height:var(--btn-h);border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:500;width:100%}
+.btn{height:48px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:500;width:100%}
 .btn:active{filter:brightness(0.82)}
 .btn-primary{background:var(--accent2);border-color:var(--accent);color:#fff}
 .btn-success{background:#1a3a1f;border-color:var(--green);color:var(--green)}
 .btn-danger{background:#3a1a1a;border-color:var(--red);color:var(--red)}
-.btn-warn{background:#3a2800;border-color:var(--orange);color:var(--orange)}
-.btn-ice{background:#0a1e2e;border-color:var(--ice);color:var(--ice)}
 .btn-sm{height:36px;font-size:13px}
 .btn-xs{height:30px;font-size:12px;padding:0 10px}
-.inp{width:100%;height:40px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:14px;padding:0 10px;outline:none}
+.inp{width:100%;height:40px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;padding:0 10px;outline:none}
 .inp:focus{border-color:var(--accent)}
-.mode-frost .inp:focus{border-color:var(--ice)}
-.inp-num{width:70px;height:36px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:15px;font-weight:700;text-align:center;padding:0 6px;outline:none;-webkit-appearance:none;}
+.inp-num{width:80px;height:36px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:15px;font-weight:700;text-align:center;padding:0 6px;outline:none;-webkit-appearance:none;}
+.inp-num:focus{border-color:var(--accent)}
 select.inp{cursor:pointer}
 .tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
 .p-off{background:#21262d;color:var(--text2)}.p-on{background:#1a3a1f;color:var(--green)}
@@ -60,13 +46,14 @@ select.inp{cursor:pointer}
 .chip[data-t="A"]{background:#1a2a3a;color:#58a6ff}.chip[data-t="B"]{background:#1a3a1a;color:var(--green)}
 .chip[data-t="C"]{background:#3a2a0a;color:var(--orange)}.chip[data-t="D"]{background:#3a1a1a;color:var(--red)}
 .chip[data-t="E"]{background:#2a1a3a;color:var(--purple)}
+.ptoggle{display:flex;background:var(--bg);border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.pbtn{flex:1;padding:10px 8px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);line-height:1.4}
+.pbtn.on{background:var(--accent2);color:#fff}
 .seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
-.sbtn{padding:10px 4px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3)}
+.sbtn{padding:10px 4px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);border-radius:8px;border:1px solid var(--border2);background:var(--bg3)}
 .sbtn.on-blue{background:#1a2a3a;border-color:var(--accent);color:var(--accent)}
-.sbtn.on-red{background:#3a1a1a;border-color:var(--red);color:var(--red)}
-.sbtn.on{background:var(--accent2);border-color:var(--accent);color:#fff}
 .empty{text-align:center;padding:24px;color:var(--text3);font-size:13px}
-.cpbox{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;font-family:monospace;font-size:13px;white-space:pre;overflow-x:auto;color:var(--text);margin-bottom:8px;line-height:1.8}
+.cpbox{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:10px;font-family:monospace;font-size:13px;white-space:pre;overflow-x:auto;color:var(--text);margin-bottom:8px;line-height:1.8}
 .tgl{position:relative;width:48px;height:26px;flex-shrink:0}
 .tgl input{opacity:0;width:0;height:0}
 .tsl{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg4);border-radius:26px;transition:.2s}
@@ -75,30 +62,24 @@ input:checked+.tsl{background:var(--green)}
 input:checked+.tsl:before{transform:translateX(22px);background:#fff}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#238636;color:#fff;padding:10px 22px;border-radius:20px;font-size:14px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
-.mov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.78);z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:var(--bg2);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:16px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;border-top:1px solid var(--border2)}
-.map-wrap{position:relative;width:100%;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border2)}
-.map-wrap img{width:100%;display:block;pointer-events:none;user-select:none}
-.city-dot{position:absolute;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.7);background:rgba(0,0,0,0.45);cursor:pointer;touch-action:none;display:flex;align-items:center;justify-content:center;}
-.city-dot.asgn{border-color:var(--accent);background:rgba(31,111,235,0.55)}
-.city-dot.face2{border-color:var(--purple);background:rgba(163,113,247,0.35)}
-.city-dot.face2.asgn{border-color:var(--purple);background:rgba(163,113,247,0.6)}
-.ptp{background:var(--bg3);border-radius:var(--radius);padding:10px;margin-top:8px;border:1px solid var(--border2)}
-.tinp{width:84px;height:36px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:15px;font-weight:700;text-align:center;padding:0 6px;outline:none}
+.mov-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.78);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--bg2);border-radius:12px 12px 0 0;padding:16px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;border-top:1px solid var(--border2)}
 .row{display:flex;align-items:center;gap:8px}.fl1{flex:1}
-.bsec{background:var(--bg3);border-radius:var(--radius);padding:8px 10px;border-left:3px solid var(--purple);margin-bottom:8px}
+.bsec{background:var(--bg3);border-radius:8px;padding:8px 10px;border-left:3px solid var(--purple);margin-bottom:8px}
 .er{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ptp{background:var(--bg3);border-radius:8px;padding:10px;margin-top:8px;border:1px solid var(--border2)}
+.tinp{width:84px;height:36px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:15px;font-weight:700;text-align:center;padding:0 6px;outline:none}
 .face-label{font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;margin-bottom:6px;display:inline-block}
 .face1-label{background:#1a2a3a;color:var(--accent)}
 .face2-label{background:#2a1a3a;color:var(--purple)}
 </style>
 </head>
-<body>
-<div id="app" style="display:none">
+<body class="mode-svs">
+<div id="app" class="svs-mode">
   <div class="header">
     <div>
-      <div class="header-title" id="app-title">突撃くん</div>
-      <div style="font-size:11px;color:var(--text3)" id="hdr-sub">読み込み中...</div>
+      <div class="header-title" id="hdr-title">突撃くん SVS版</div>
+      <div style="font-size:11px;color:var(--text3)" id="hdr-sub">WOS SVS 同時着弾管理</div>
     </div>
     <div style="font-size:11px;text-align:right;color:var(--text2);white-space:pre-line" id="hdr-info"></div>
   </div>
@@ -109,16 +90,118 @@ input:checked+.tsl:before{transform:translateX(22px);background:#fff}
 
 <script>
 // ============================================================
-// 統合版 突撃くん
-// MODE: 'svs' or 'frost'
+// 共通定数
 // ============================================================
-const FROST_REPO='https://kekj12kek-sudo.github.io/frost-dragon-app/';
+const REPO_SVS='https://kekj12kek-sudo.github.io/svs-app/';
+const REPO_FROST='https://kekj12kek-sudo.github.io/frost-dragon-app/';
 const GAS_URL='https://script.google.com/macros/s/AKfycbyES7vlaVErWjcK7WAmcM4cHg1s6EL1kQIxsuELXLmf8GbGNLGfnel_Mp-Qg33BKDb8iQ/exec';
 const TEAMS=['A','B','C','D','E'];
 
-// ===== SVS定数 =====
+// SVS定数
 const M6=[43,39,36,36,39,43],M5=[40,37,36,37,40];
 const P6=[37,33,30,30,33,37],P5=[34,31,30,31,34];
+
+// ============================================================
+// モード管理
+// ============================================================
+let MODE='svs'; // 'svs' or 'frost'
+
+function setMode(m){
+  MODE=m;
+  const app=document.getElementById('app');
+  const body=document.body;
+  if(m==='svs'){
+    app.className='svs-mode';body.className='mode-svs';
+    document.getElementById('hdr-title').textContent='突撃くん SVS版';
+    document.getElementById('hdr-sub').textContent='WOS SVS 同時着弾管理';
+  } else {
+    app.className='frost-mode';body.className='mode-frost';
+    document.getElementById('hdr-title').textContent='❄️ 突撃くん 霜竜版';
+    document.getElementById('hdr-sub').textContent='霜竜 同時着弾管理';
+  }
+  buildTabs();
+  render();
+}
+
+function buildTabs(){
+  const tabs=document.getElementById('tabs');
+  if(MODE==='svs'){
+    tabs.innerHTML=`
+      <div class="tab active" data-tab="setup">① 事前設定</div>
+      <div class="tab" data-tab="battle">② 当日参戦</div>
+      <div class="tab" data-tab="calc">同着計算</div>
+      <div class="tab" data-tab="copy">コピー</div>
+      <div class="tab" data-tab="enemy">敵情報</div>`;
+    SS.tab='battle';
+  } else {
+    tabs.innerHTML=`
+      <div class="tab active" data-tab="battle">② 当日参戦</div>
+      <div class="tab" data-tab="calc">同着計算</div>
+      <div class="tab" data-tab="copy">コピー</div>
+      <div class="tab" data-tab="enemy">敵情報</div>`;
+    FS.tab='battle';
+  }
+  document.getElementById('tabs').addEventListener('click',e=>{
+    const t=e.target.closest('[data-tab]');
+    if(!t)return;
+    if(MODE==='svs')SS.tab=t.dataset.tab;
+    else FS.tab=t.dataset.tab;
+    render();
+  },{once:true});
+  document.getElementById('tabs').addEventListener('click',e=>{
+    const t=e.target.closest('[data-tab]');if(!t)return;
+    if(MODE==='svs')SS.tab=t.dataset.tab;
+    else FS.tab=t.dataset.tab;
+    render();
+  });
+}
+
+// ============================================================
+// SVS STATE
+// ============================================================
+const SS={
+  tab:'battle',split:'lr',faction:'blue',placementA:'6',placementB:'6',
+  members:[],cityAssign:{},active:[],pet:{},petStart:{},enemies:[],
+  modal:null,selCity:null,now:Date.now(),
+  adjust:{},     // {memberId: {march:0, petMarch:0}} 個人調整値
+};
+
+// ============================================================
+// 霜竜 STATE
+// ============================================================
+const FS={
+  tab:'battle',
+  members:[],active:[],pet:{},petStart:{},enemies:[],now:Date.now(),
+  baseId:null,  // 基準メンバーID（nullの場合は最短行軍が自動選択）
+};
+
+// ============================================================
+// 共通ユーティリティ
+// ============================================================
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200);}
+function cp(txt){navigator.clipboard.writeText(txt).then(()=>toast('コピーしました！')).catch(()=>toast('コピー失敗'));}
+function tc(t){return{A:'#58a6ff',B:'#3fb950',C:'#e3b341',D:'#f85149',E:'#a371f7'}[t]||'#2f81f7';}
+
+// ペット共通
+function petSt(id,state){
+  const pet=state.pet,petStart=state.petStart,now=state.now;
+  if(!pet[id])return'off';
+  const rem=120-(now-(petStart[id]||now))/60000;
+  if(rem<=0)return'dead';if(rem<=10)return'low';if(rem<=30)return'warn';return'on';
+}
+function petLbl(id,state){
+  if(!state.pet[id])return'⚪ 未使用';
+  const rem=120-(state.now-(state.petStart[id]||state.now))/60000;
+  if(rem<=0)return'⚫ 失効';
+  const m=Math.floor(rem),s=Math.floor((rem-m)*60);
+  return`${{on:'🟢',warn:'🟡',low:'🔴'}[petSt(id,state)]||'⚪'} ${m}:${String(s).padStart(2,'0')}`;
+}
+function fmtT(id,state){const t=new Date(state.petStart[id]||Date.now());return`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;}
+function fmtE(id,state){const e=new Date((state.petStart[id]||Date.now())+7200000);return`${String(e.getHours()).padStart(2,'0')}:${String(e.getMinutes()).padStart(2,'0')}`;}
+
+// ============================================================
+// SVS ロジック
+// ============================================================
 const FIXED_POS={
   'lr_blue_A_6':[{"x":72.6,"y":23.08},{"x":61.25,"y":33.68},{"x":49.83,"y":44.73},{"x":37.81,"y":56.49},{"x":25.33,"y":68.82},{"x":11.47,"y":81.88}],
   'lr_blue_B_6':[{"x":15.29,"y":31.52},{"x":28.61,"y":41.73},{"x":40.47,"y":51.04},{"x":53.1,"y":60.18},{"x":66.43,"y":70.24},{"x":79.06,"y":80.57}],
@@ -137,347 +220,308 @@ const FIXED_POS={
   'ud_red_A_5':[{"x":22.33,"y":36.81},{"x":34.44,"y":46.54},{"x":46.95,"y":56.02},{"x":59.6,"y":65.97},{"x":73.08,"y":75.18}],
   'ud_red_B_5':[{"x":37.21,"y":58.83},{"x":47.27,"y":51.9},{"x":57.04,"y":43.96},{"x":67.18,"y":36.38},{"x":76.32,"y":28.82}],
 };
-const IMG={
-  lr_blue_A:FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_54_40.png',
-  lr_blue_B:FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_54_56.png',
-  lr_red_A: FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_55_08.png',
-  lr_red_B: FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_55_12.png',
-  ud_blue_A:FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_54_40.png',
-  ud_blue_B:FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2023_48_15.png',
-  ud_red_A: FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2023_47_59.png',
-  ud_red_B: FROST_REPO+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_55_12.png',
-};
 
-// ============================================================
-// GLOBAL STATE
-// ============================================================
-let MODE='svs'; // 'svs' or 'frost'
-
-// SVS STATE
-const SVS={
-  tab:'battle', split:'lr', faction:'blue', placementA:'6', placementB:'6',
-  members:[], cityAssign:{}, active:[], pet:{}, petStart:{}, enemies:[],
-  modal:null, selCity:null, now:Date.now(),
-};
-
-// FROST STATE
-const FROST={
-  tab:'battle',
-  members:[], active:[], pet:{}, petStart:{}, enemies:[],
-  now:Date.now(),
-};
-
-// ============================================================
-// 共通ユーティリティ
-// ============================================================
-function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200);}
-function cp(txt){navigator.clipboard.writeText(txt).then(()=>toast('コピーしました！')).catch(()=>toast('コピー失敗'));}
-function tc(t){return{A:'#58a6ff',B:'#3fb950',C:'#e3b341',D:'#f85149',E:'#a371f7'}[t]||'#2f81f7';}
-function fmtT(id,petStart){const t=new Date(petStart[id]||Date.now());return`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;}
-function fmtE(id,petStart){const e=new Date((petStart[id]||Date.now())+7200000);return`${String(e.getHours()).padStart(2,'0')}:${String(e.getMinutes()).padStart(2,'0')}`;}
-
-function petSt(id, petObj, petStartObj, now){
-  if(!petObj[id])return'off';
-  const rem=120-(now-(petStartObj[id]||now))/60000;
-  if(rem<=0)return'dead';if(rem<=10)return'low';if(rem<=30)return'warn';return'on';
+function sCityPos(faceKey){
+  const p=faceKey==='A'?SS.placementA:SS.placementB;
+  return FIXED_POS[`${SS.split}_${SS.faction}_${faceKey}_${p}`]||[];
 }
-function petLbl(id, petObj, petStartObj, now){
-  if(!petObj[id])return'⚪ 未使用';
-  const rem=120-(now-(petStartObj[id]||now))/60000;
-  if(rem<=0)return'⚫ 失効';
-  const m=Math.floor(rem),s=Math.floor((rem-m)*60);
-  return`${{on:'🟢',warn:'🟡',low:'🔴'}[petSt(id,petObj,petStartObj,now)]||'⚪'} ${m}:${String(s).padStart(2,'0')}`;
+function sMarchArr(faceKey){return(faceKey==='A'?SS.placementA:SS.placementB)==='6'?M6:M5;}
+function sPetArr(faceKey){return(faceKey==='A'?SS.placementA:SS.placementB)==='6'?P6:P5;}
+function sCityCount(faceKey){return parseInt(faceKey==='A'?SS.placementA:SS.placementB);}
+function sTotalCities(){return sCityCount('A')+sCityCount('B');}
+function sGetCityIdx(mid){for(const[k,v] of Object.entries(SS.cityAssign)){if(v===mid)return{face:k[0],idx:parseInt(k.slice(1))-1,key:k};}return null;}
+function sGetMarch(mid){
+  const info=sGetCityIdx(mid);if(!info)return null;
+  const ms=sMarchArr(info.face),pm=sPetArr(info.face);
+  const adj=SS.adjust[mid]||{march:0,petMarch:0};
+  const hasPet=SS.pet[mid]&&petSt(mid,SS)!=='dead';
+  return hasPet?(pm[info.idx]+(adj.petMarch||0)):(ms[info.idx]+(adj.march||0));
 }
-
-// ペットUI共通
-function petRow(mid, petObj, petStartObj, now, toggleFn, setPetTFn, setPetNFn){
-  const st=petSt(mid,petObj,petStartObj,now);
-  const pc={off:'p-off',on:'p-on',warn:'p-warn',low:'p-low',dead:'p-dead'}[st];
-  return`<div class="row" style="margin-bottom:${petObj[mid]?'6':'0'}px">
-    <span class="tag ${pc}">${petLbl(mid,petObj,petStartObj,now)}</span>
-    <button class="btn btn-xs" style="width:74px" onclick="${toggleFn}(${mid})">${petObj[mid]?'停止':'ペットON'}</button>
-  </div>
-  ${petObj[mid]?`<div class="ptp">
-    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
-    <div class="row" style="margin-bottom:4px">
-      <input class="tinp" type="time" value="${fmtT(mid,petStartObj)}" onchange="${setPetTFn}(${mid},this.value)"/>
-      <button class="btn btn-xs" style="width:64px" onclick="${setPetNFn}(${mid})">今すぐ</button>
-      <span style="font-size:11px;color:var(--text2)">から2時間</span>
-    </div>
-    <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(mid,petStartObj)}</div>
-  </div>`:''}`;
+function sGetBaseMarch(mid){
+  const info=sGetCityIdx(mid);if(!info)return null;
+  return sMarchArr(info.face)[info.idx];
 }
-
-// ============================================================
-// SVS 関数群
-// ============================================================
-function svsFactionLabel(){
-  if(SVS.split==='lr')return SVS.faction==='blue'?'左陣営（青）':'右陣営（赤）';
-  return SVS.faction==='blue'?'上陣営（青）':'下陣営（赤）';
+function sGetBasePetMarch(mid){
+  const info=sGetCityIdx(mid);if(!info)return null;
+  return sPetArr(info.face)[info.idx];
 }
-function svsFaceLabel(faceKey){
-  if(SVS.split==='lr'){const s=SVS.faction==='blue'?'左':'右';return faceKey==='A'?`${s}上エリア`:`${s}下エリア`;}
-  const s=SVS.faction==='blue'?'上':'下';return faceKey==='A'?`${s}左エリア`:`${s}右エリア`;
+function sAdjust(mid,key,delta){
+  if(!SS.adjust[mid])SS.adjust[mid]={march:0,petMarch:0};
+  SS.adjust[mid][key]=(SS.adjust[mid][key]||0)+delta;
+  render();
 }
-function svsPosKey(faceKey,placement){return`${SVS.split}_${SVS.faction}_${faceKey}_${placement}`;}
-function svsGetCityPos(faceKey){const p=faceKey==='A'?SVS.placementA:SVS.placementB;return FIXED_POS[svsPosKey(faceKey,p)]||[];}
-function svsMarchList(faceKey){return(faceKey==='A'?SVS.placementA:SVS.placementB)==='6'?M6:M5;}
-function svsPetMarchList(faceKey){return(faceKey==='A'?SVS.placementA:SVS.placementB)==='6'?P6:P5;}
-function svsCityCount(faceKey){return parseInt(faceKey==='A'?SVS.placementA:SVS.placementB);}
-function svsTotalCities(){return svsCityCount('A')+svsCityCount('B');}
-function svsGetMemberCityInfo(mid){
-  for(const[k,v] of Object.entries(SVS.cityAssign)){if(v===mid){const face=k[0];const idx=parseInt(k.slice(1))-1;return{face,idx,key:k};}}
-  return null;
+function sFaceLabel(faceKey){
+  if(SS.split==='lr'){const side=SS.faction==='blue'?'左':'右';return faceKey==='A'?`${side}上エリア`:`${side}下エリア`;}
+  else{const side=SS.faction==='blue'?'上':'下';return faceKey==='A'?`${side}左エリア`:`${side}右エリア`;}
 }
-function svsGetMemberMarch(mid){
-  const info=svsGetMemberCityInfo(mid);if(!info)return null;
-  const ms=svsMarchList(info.face),pm=svsPetMarchList(info.face);
-  return(SVS.pet[mid]&&petSt(mid,SVS.pet,SVS.petStart,SVS.now)!=='dead')?pm[info.idx]:ms[info.idx];
+function sFactionLabel(){
+  if(SS.split==='lr')return SS.faction==='blue'?'左陣営（青）':'右陣営（赤）';
+  return SS.faction==='blue'?'上陣営（青）':'下陣営（赤）';
 }
-function svsCalcHits(mems){
-  const wm=mems.map(m=>({...m,march:svsGetMemberMarch(m.id)})).filter(m=>m.march!==null);
+function sGetMapImg(faceKey){
+  const IMG={
+    'lr_blue_A':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_54_40.png',
+    'lr_blue_B':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_54_56.png',
+    'lr_red_A':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_55_08.png',
+    'lr_red_B':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_55_12.png',
+    'ud_blue_A':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_54_40.png',
+    'ud_blue_B':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2023_48_15.png',
+    'ud_red_A':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2023_47_59.png',
+    'ud_red_B':REPO_SVS+'ChatGPT%20Image%202026%E5%B9%B45%E6%9C%8824%E6%97%A5%2022_55_12.png',
+  };
+  return IMG[`${SS.split}_${SS.faction}_${faceKey}`]||'';
+}
+function sCalcHits(mems){
+  const wm=mems.map(m=>({...m,march:sGetMarch(m.id)})).filter(m=>m.march!==null);
   if(!wm.length)return[];
   const base=Math.min(...wm.map(m=>m.march));
-  return wm.map(m=>({...m,wait:m.march-base})).sort((a,b)=>b.wait-a.wait);
+  return wm.map(m=>{
+    const diff=m.march-base;
+    return{...m,wait:diff,countLabel:diff>0?String(diff):diff<0?`+${Math.abs(diff)}`:'0'};
+  }).sort((a,b)=>b.wait-a.wait);
 }
-function svsGetMapImg(faceKey){return IMG[`${SVS.split}_${SVS.faction}_${faceKey}`]||'';}
 
 // ============================================================
-// FROST 関数群
+// 霜竜 ロジック
 // ============================================================
-function frostGetEffectiveMarch(mid){
-  const m=FROST.members.find(m=>m.id===mid);if(!m)return null;
-  if(FROST.pet[mid]&&petSt(mid,FROST.pet,FROST.petStart,FROST.now)!=='dead'&&m.petMarch)return m.petMarch;
+function fGetMarch(mid){
+  const m=FS.members.find(m=>m.id===mid);if(!m)return null;
+  if(FS.pet[mid]&&petSt(mid,FS)!=='dead'&&m.petMarch)return m.petMarch;
   return m.march||null;
 }
-function frostCalcHits(mems){
-  const wm=mems.map(m=>({...m,march:frostGetEffectiveMarch(m.id)})).filter(m=>m.march!==null&&m.march>0);
+function fGetBase(wm){
+  // FS.baseIdが設定されていればその行軍時間を基準に、なければ最短
+  if(FS.baseId){
+    const bm=wm.find(m=>m.id===FS.baseId);
+    if(bm)return{base:bm.march,baseMember:bm};
+  }
+  const minMarch=Math.min(...wm.map(m=>m.march));
+  const bm=wm.find(m=>m.march===minMarch);
+  return{base:minMarch,baseMember:bm};
+}
+function fCalcHits(mems){
+  const wm=mems.map(m=>({...m,march:fGetMarch(m.id)})).filter(m=>m.march!==null&&m.march>0);
   if(!wm.length)return[];
-  const base=Math.min(...wm.map(m=>m.march));
-  return wm.map(m=>({...m,wait:m.march-base})).sort((a,b)=>b.wait-a.wait);
+  const{base,baseMember}=fGetBase(wm);
+  return wm.map(m=>{
+    const diff=m.march-base;
+    // diff>0: 基準より長い → 先に出す → 正数カウント表示
+    // diff<0: 基準より短い → 後から出す → +N表示
+    // diff=0: 基準 → 0
+    return{...m,wait:diff,countLabel:diff>0?String(diff):diff<0?`+${Math.abs(diff)}`:'0'};
+  }).sort((a,b)=>b.wait-a.wait);
 }
 
 // ============================================================
 // メインrender
 // ============================================================
 function render(){
-  const isSVS=MODE==='svs';
-  document.body.className=isSVS?'':'mode-frost';
-  document.getElementById('app-title').textContent=isSVS?'突撃くん SVS版':'❄️ 突撃くん 霜竜版';
-  document.getElementById('hdr-sub').textContent=isSVS?'WOS SVS 同時着弾管理':'霜竜 同時着弾管理';
-
-  // タブ設定
-  const tabsEl=document.getElementById('tabs');
-  if(isSVS){
-    tabsEl.innerHTML=`
-      <div class="tab ${SVS.tab==='setup'?'active':''}" data-tab="setup">① 事前設定</div>
-      <div class="tab ${SVS.tab==='battle'?'active':''}" data-tab="battle">② 当日参戦</div>
-      <div class="tab ${SVS.tab==='calc'?'active':''}" data-tab="calc">同着計算</div>
-      <div class="tab ${SVS.tab==='copy'?'active':''}" data-tab="copy">コピー</div>
-      <div class="tab ${SVS.tab==='enemy'?'active':''}" data-tab="enemy">敵情報</div>`;
-    const ac=SVS.members.filter(m=>SVS.active.includes(m.id));
-    document.getElementById('hdr-info').textContent=`${svsFactionLabel()}\n割当${Object.keys(SVS.cityAssign).length}/${svsTotalCities()}`;
-    const c=document.getElementById('content');
-    ({setup:renderSVSSetup,battle:renderSVSBattle,calc:renderSVSCalc,copy:renderSVSCopy,enemy:renderSVSEnemy})[SVS.tab]?.(c);
+  document.querySelectorAll('.tab').forEach(t=>{
+    const active=(MODE==='svs'?SS.tab:FS.tab)===t.dataset.tab;
+    t.classList.toggle('active',active);
+  });
+  const tab=MODE==='svs'?SS.tab:FS.tab;
+  const el=document.getElementById('content');
+  if(MODE==='svs'){
+    const hdrInfo=document.getElementById('hdr-info');
+    hdrInfo.textContent=`${sFactionLabel()}\n割当${Object.keys(SS.cityAssign).length}/${sTotalCities()}`;
+    ({setup:rSvsSetup,battle:rSvsBattle,calc:rSvsCalc,copy:rSvsCopy,enemy:rSvsEnemy})[tab]?.(el);
   } else {
-    tabsEl.innerHTML=`
-      <div class="tab ${FROST.tab==='battle'?'active':''}" data-tab="battle">② 当日参戦</div>
-      <div class="tab ${FROST.tab==='calc'?'active':''}" data-tab="calc">同着計算</div>
-      <div class="tab ${FROST.tab==='copy'?'active':''}" data-tab="copy">コピー</div>
-      <div class="tab ${FROST.tab==='enemy'?'active':''}" data-tab="enemy">敵情報</div>`;
-    const ac=FROST.members.filter(m=>FROST.active.includes(m.id));
+    const ac=FS.members.filter(m=>FS.active.includes(m.id));
     document.getElementById('hdr-info').textContent=`参戦: ${ac.length}名`;
-    const c=document.getElementById('content');
-    ({battle:renderFrostBattle,calc:renderFrostCalc,copy:renderFrostCopy,enemy:renderFrostEnemy})[FROST.tab]?.(c);
+    ({battle:rFrostBattle,calc:rFrostCalc,copy:rFrostCopy,enemy:rFrostEnemy})[tab]?.(el);
   }
-  saveAll();
 }
 
-// タブクリック
-document.getElementById('tabs').addEventListener('click',e=>{
-  const t=e.target.closest('[data-tab]');
-  if(!t)return;
-  if(MODE==='svs')SVS.tab=t.dataset.tab;
-  else FROST.tab=t.dataset.tab;
-  render();
-});
-
 // ============================================================
-// SVS 画面レンダリング
+// SVS タブ実装
 // ============================================================
-function renderSVSSetup(el){
-  const factionOptions=SVS.split==='lr'
-    ?[{v:'blue',l:'左（青）'},{v:'red',l:'右（赤）'}]
-    :[{v:'blue',l:'上（青）'},{v:'red',l:'下（赤）'}];
-
+function rSvsSetup(el){
+  const factionOptions=SS.split==='lr'?[{v:'blue',l:'左（青）'},{v:'red',l:'右（赤）'}]:[{v:'blue',l:'上（青）'},{v:'red',l:'下（赤）'}];
   el.innerHTML=`
 <div class="card">
   <div class="sec">STEP 1 — 陣営設定</div>
   <div style="font-size:11px;color:var(--text2);margin-bottom:6px">エリア分け</div>
   <div class="seg2" style="margin-bottom:12px">
-    <div class="sbtn ${SVS.split==='lr'?'on':''}" onclick="svsSetSplit('lr')">左右分け</div>
-    <div class="sbtn ${SVS.split==='ud'?'on':''}" onclick="svsSetSplit('ud')">上下分け</div>
+    <div class="sbtn ${SS.split==='lr'?'on-blue':''}" onclick="sSplit('lr')">左右分け</div>
+    <div class="sbtn ${SS.split==='ud'?'on-blue':''}" onclick="sSplit('ud')">上下分け</div>
   </div>
   <div style="font-size:11px;color:var(--text2);margin-bottom:6px">自陣</div>
   <div class="seg2" style="margin-bottom:12px">
-    ${factionOptions.map(f=>`<div class="sbtn ${SVS.faction===f.v?'on-blue':''}" onclick="svsSetFaction('${f.v}')">${f.l}</div>`).join('')}
+    ${factionOptions.map(f=>`<div class="sbtn ${SS.faction===f.v?'on-blue':''}" onclick="sFaction('${f.v}')">${f.l}</div>`).join('')}
   </div>
   <div style="font-size:11px;color:var(--text2);margin-bottom:6px">都市配置</div>
-  <div style="background:var(--bg3);border-radius:var(--radius);padding:10px;margin-bottom:6px">
-    <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">${svsFaceLabel('A')}</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:6px">
+    <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">${sFaceLabel('A')}</div>
     <div class="seg2" style="margin-bottom:0">
-      <div class="sbtn ${SVS.placementA==='6'?'on':''}" onclick="svsSetPA('6')">6都市</div>
-      <div class="sbtn ${SVS.placementA==='5'?'on':''}" onclick="svsSetPA('5')">5都市</div>
+      <div class="sbtn ${SS.placementA==='6'?'on-blue':''}" onclick="sPA('6')">6都市</div>
+      <div class="sbtn ${SS.placementA==='5'?'on-blue':''}" onclick="sPA('5')">5都市</div>
     </div>
   </div>
-  <div style="background:var(--bg3);border-radius:var(--radius);padding:10px">
-    <div style="font-size:12px;font-weight:600;color:var(--purple);margin-bottom:6px">${svsFaceLabel('B')}</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px">
+    <div style="font-size:12px;font-weight:600;color:var(--purple);margin-bottom:6px">${sFaceLabel('B')}</div>
     <div class="seg2" style="margin-bottom:0">
-      <div class="sbtn ${SVS.placementB==='6'?'on':''}" onclick="svsSetPB('6')">6都市</div>
-      <div class="sbtn ${SVS.placementB==='5'?'on':''}" onclick="svsSetPB('5')">5都市</div>
+      <div class="sbtn ${SS.placementB==='6'?'on-blue':''}" onclick="sPB('6')">6都市</div>
+      <div class="sbtn ${SS.placementB==='5'?'on-blue':''}" onclick="sPB('5')">5都市</div>
     </div>
   </div>
-  <div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:var(--radius);font-size:12px;color:var(--text2);text-align:center">
-    合計 <span style="font-size:16px;font-weight:700;color:var(--text)">${svsTotalCities()}</span> 都市
+  <div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--text2);text-align:center">
+    合計 <span style="font-size:16px;font-weight:700;color:var(--text)">${sTotalCities()}</span> 都市
   </div>
 </div>
-
 <div class="card">
-  <div class="sec">STEP 2 — 集結主登録 (${SVS.members.length}/20名)</div>
+  <div class="sec">STEP 2 — 集結主登録 (${SS.members.length}/20名)</div>
   <div class="row" style="margin-bottom:10px">
-    <input class="inp fl1" id="svs-nn" placeholder="名前を入力"/>
-    <button class="btn btn-sm" style="width:80px;flex-shrink:0" onclick="svsAddM()">追加</button>
+    <input class="inp fl1" id="snn" placeholder="名前を入力"/>
+    <button class="btn btn-sm" style="width:80px;flex-shrink:0" onclick="sAddM()">追加</button>
   </div>
-  ${SVS.members.map(m=>{
-    const info=svsGetMemberCityInfo(m.id);
-    const march=info?svsMarchList(info.face)[info.idx]:null;
-    const fLabel=info?svsFaceLabel(info.face):'';
+  ${SS.members.map(m=>{
+    const info=sGetCityIdx(m.id);
+    const march=info?sMarchArr(info.face)[info.idx]:null;
+    const fLabel=info?sFaceLabel(info.face):'';
     return`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
       <div style="flex:1">
         <div style="font-size:14px;font-weight:600">${m.name}</div>
         <div style="font-size:11px;color:${info?'var(--accent)':'var(--text3)'}">
-          ${info?`${fLabel} 都市${info.idx+1} — ${march}秒`:'未割当'}
+          ${info?`${fLabel} 都市${info.idx+1} — ${march}秒`:'都市未割当'}
         </div>
       </div>
-      <button class="btn btn-xs btn-danger" style="width:30px;padding:0" onclick="svsRmv(${m.id})">✕</button>
+      <button class="btn btn-xs btn-danger" style="width:30px;padding:0" onclick="sRmv(${m.id})">✕</button>
     </div>`;
   }).join('')||'<div class="empty">メンバーを追加してください</div>'}
 </div>
-
 ${['A','B'].map(face=>{
-  const fLabel=svsFaceLabel(face);
-  const placement=face==='A'?SVS.placementA:SVS.placementB;
-  const positions=svsGetCityPos(face);
-  const ms=svsMarchList(face);
-  const pms=svsPetMarchList(face);
-  const n=svsCityCount(face);
-  const assigned=Object.keys(SVS.cityAssign).filter(k=>k[0]===face).length;
-
+  const fLabel=sFaceLabel(face);
+  const positions=sCityPos(face);
+  const ms=sMarchArr(face),pms=sPetArr(face);
+  const n=sCityCount(face);
+  const assigned=Object.keys(SS.cityAssign).filter(k=>k[0]===face).length;
   const dots=positions.slice(0,n).map((p,i)=>{
-    const key=`${face}${i+1}`;
-    const mid=SVS.cityAssign[key];
-    const mem=mid?SVS.members.find(m=>m.id===mid):null;
-    return`<div class="city-dot ${mid?'asgn':''} ${face==='B'?'face2':''}"
-      id="dot-${face}-${i}" data-face="${face}" data-idx="${i}"
-      style="left:${p.x.toFixed(2)}%;top:${p.y.toFixed(2)}%;z-index:10">
+    const key=`${face}${i+1}`;const mid=SS.cityAssign[key];const mem=mid?SS.members.find(m=>m.id===mid):null;
+    return`<div style="position:absolute;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;border:2px solid ${mid?'var(--accent)':'rgba(255,255,255,0.5)'};background:${mid?'rgba(31,111,235,0.5)':'rgba(0,0,0,0.5)'};cursor:pointer;display:flex;align-items:center;justify-content:center;left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;z-index:1"
+      onclick="sOpenCM('${key}',${i},'${face}')">
       <div style="font-size:10px;font-weight:700;color:#fff;text-shadow:0 0 4px #000;pointer-events:none">${mem?mem.name.slice(0,2):`${i+1}`}</div>
     </div>`;
   }).join('');
-
   return`<div class="card" style="padding:8px">
     <div style="padding:0 4px 8px;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span>
-        <span style="font-size:13px;font-weight:600;margin-left:6px">${fLabel} ${placement}都市</span>
-      </div>
-      <span style="font-size:11px;font-weight:600;color:${assigned===n?'var(--green)':'var(--orange)'}">
-        ${assigned}/${n}割当
-      </span>
+      <div><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span>
+      <span style="font-size:13px;font-weight:600;margin-left:6px">${fLabel} ${face==='A'?SS.placementA:SS.placementB}都市</span></div>
+      <span style="font-size:11px;font-weight:600;color:${assigned===n?'var(--green)':'var(--orange)'}">${assigned}/${n}割当</span>
     </div>
-    <div class="map-wrap" id="wrap-${face}">
-      <img src="${svsGetMapImg(face)}" alt="マップ"/>
+    <div style="position:relative;width:100%;border-radius:8px;overflow:hidden;border:1px solid var(--border2)">
+      <img src="${sGetMapImg(face)}" style="width:100%;display:block;pointer-events:none"/>
       ${dots}
     </div>
     <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:4px">都市をタップして集結主を割当</div>
-    <div style="margin-top:8px">
-      ${Array.from({length:n},(_,i)=>{
-        const key=`${face}${i+1}`;const mid=SVS.cityAssign[key];const mem=mid?SVS.members.find(m=>m.id===mid):null;
-        return`<div style="display:flex;align-items:center;padding:6px 2px;border-bottom:1px solid var(--border);cursor:pointer" id="list-${face}-${i}">
-          <div style="width:22px;height:22px;border-radius:50%;background:${mem?(face==='A'?'var(--accent2)':'#2a1a3a'):'var(--bg3)'};border:1px solid ${mem?(face==='A'?'var(--accent)':'var(--purple)'):'var(--border2)'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${mem?'#fff':'var(--text3)'};flex-shrink:0;margin-right:8px">${i+1}</div>
-          <div style="flex:1;font-size:13px;font-weight:${mem?600:400};color:${mem?'var(--text)':'var(--text3)'}">${mem?mem.name:'未割当'}</div>
-          <div style="text-align:right;margin-right:8px">
-            <div style="font-size:13px;font-weight:700">${ms[i]}秒</div>
-            <div style="font-size:10px;color:var(--green)">🐾${pms[i]}秒</div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
   </div>`;
 }).join('')}`;
-
-  // タップイベント設定
-  ['A','B'].forEach(face=>{
-    const wrap=document.getElementById(`wrap-${face}`);
-    if(!wrap)return;
-    const n=svsCityCount(face);
-    wrap.querySelectorAll('.city-dot').forEach(dot=>{
-      dot.addEventListener('click',e=>{e.stopPropagation();const i=parseInt(dot.dataset.idx);svsOpenModal(`${dot.dataset.face}${i+1}`,dot.dataset.face,i);});
-    });
-    for(let i=0;i<n;i++){
-      const el=document.getElementById(`list-${face}-${i}`);
-      if(el)el.addEventListener('click',()=>svsOpenModal(`${face}${i+1}`,face,i));
-    }
-  });
+  if(SS.modal==='city')sCityModal();
 }
 
-function renderSVSBattle(el){
-  const ms_a=svsMarchList('A'),ms_b=svsMarchList('B');
-  const pms_a=svsPetMarchList('A'),pms_b=svsPetMarchList('B');
-  const entries=Object.entries(SVS.cityAssign)
-    .map(([key,mid])=>({key,face:key[0],idx:parseInt(key.slice(1))-1,mid}))
-    .sort((a,b)=>a.face.localeCompare(b.face)||a.idx-b.idx);
+function sOpenCM(key,idx,face){SS.selCity={key,idx,face};SS.modal='city';sCityModal();}
+function sCityModal(){
+  let ov=document.getElementById('cmov');
+  if(!ov){ov=document.createElement('div');ov.id='cmov';ov.className='mov-modal';ov.onclick=e=>{if(e.target===ov){SS.modal=null;ov.remove();}};document.body.appendChild(ov);}
+  const{key,idx,face}=SS.selCity;
+  const ms=sMarchArr(face),pms=sPetArr(face);
+  const fLabel=sFaceLabel(face);
+  ov.innerHTML=`<div class="modal">
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px">${fLabel} 都市${idx+1} — 集結主を選択</div>
+    <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:12px;display:flex">
+      <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3)">通常</div><div style="font-size:34px;font-weight:700;color:var(--accent);line-height:1">${ms[idx]}<span style="font-size:12px">秒</span></div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3)">ペット</div><div style="font-size:34px;font-weight:700;color:var(--green);line-height:1">${pms[idx]}<span style="font-size:12px">秒</span></div></div>
+    </div>
+    ${SS.cityAssign[key]?`<button class="btn btn-sm btn-danger" style="margin-bottom:10px" onclick="sAsgn('${key}',null)">割当解除</button>`:''}
+    ${SS.members.map(m=>{
+      const isCur=SS.cityAssign[key]===m.id;
+      const info=sGetCityIdx(m.id);const isOther=info&&info.key!==key;
+      return`<div style="display:flex;align-items:center;padding:12px;background:${isCur?'#1a2a3a':'var(--bg3)'};border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid ${isCur?'var(--accent)':'var(--border)'}" onclick="sAsgn('${key}',${m.id})">
+        <div style="flex:1"><div style="font-size:14px;font-weight:600">${m.name} ${isCur?'✓':''}</div>
+        <div style="font-size:11px;color:${isOther?'var(--orange)':'var(--text3)'}">${isCur?'現在割当中':isOther?`${sFaceLabel(info.face)} 都市${info.idx+1}から移動`:'未割当'}</div></div>
+      </div>`;
+    }).join('')||'<div class="empty">メンバーを先に登録してください</div>'}
+  </div>`;
+}
+function sAsgn(key,id){
+  if(id){if(SS.cityAssign[key]===id)delete SS.cityAssign[key];else{for(const k of Object.keys(SS.cityAssign)){if(SS.cityAssign[k]===id)delete SS.cityAssign[k];}SS.cityAssign[key]=id;}
+  }else delete SS.cityAssign[key];
+  SS.modal=null;document.getElementById('cmov')?.remove();render();
+}
 
+function rSvsBattle(el){
+  const entries=Object.entries(SS.cityAssign).map(([key,mid])=>({key,face:key[0],idx:parseInt(key.slice(1))-1,mid})).sort((a,b)=>a.face.localeCompare(b.face)||a.idx-b.idx);
   el.innerHTML=`
-<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
   <div>
-    <div style="font-size:12px;color:var(--text2)">${svsFactionLabel()} ${SVS.placement==='6'?'':''}${SVS.placementA}+${SVS.placementB}都市</div>
-    <div style="font-size:11px;color:var(--text3)">参戦: ${SVS.active.length}名 / 登録: ${entries.length}名</div>
+    <div style="font-size:12px;color:var(--text2)">${sFactionLabel()} ${sTotalCities()}都市</div>
+    <div style="font-size:11px;color:var(--text3)">参戦: ${SS.active.length}名 / 登録: ${entries.length}名</div>
   </div>
   <div style="display:flex;gap:6px">
-    <button class="btn btn-xs btn-success" onclick="svsAllJoin()">全員参戦</button>
-    <button class="btn btn-xs" onclick="svsAllLeave()" style="color:var(--text3)">全員解除</button>
+    <button class="btn btn-xs btn-success" onclick="sAllJoin()">全員参戦</button>
+    <button class="btn btn-xs" onclick="sAllLeave()" style="color:var(--text3)">全員解除</button>
   </div>
 </div>
-${['A','B'].map((face,fi)=>{
-  const ms=face==='A'?ms_a:ms_b;
-  const pms=face==='A'?pms_a:pms_b;
+${['A','B'].map(face=>{
+  const fLabel=sFaceLabel(face);
+  const ms=sMarchArr(face),pms=sPetArr(face);
   const faceEntries=entries.filter(e=>e.face===face);
-  if(!faceEntries.length)return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;margin-bottom:8px;text-align:center;color:var(--text3);font-size:13px">
-    <span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${svsFaceLabel(face)}: 未割当
-  </div>`;
-  return`<div style="background:var(--bg3);border-radius:var(--radius);padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-    <span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span>
-    <span style="font-size:12px;color:var(--text2)">${svsFaceLabel(face)}</span>
-  </div>
+  if(!faceEntries.length)return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;text-align:center;color:var(--text3);font-size:13px"><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${fLabel}: 割当なし</div>`;
+  return`<div style="background:var(--bg3);border-radius:8px;padding:5px 10px;margin-bottom:6px;font-size:11px;font-weight:700;color:var(--text2)"><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${fLabel}</div>
   ${faceEntries.map(({key,idx,mid})=>{
-    const mem=SVS.members.find(m=>m.id===mid);if(!mem)return'';
-    const isActive=SVS.active.includes(mid);
-    const hasPet=SVS.pet[mid]&&petSt(mid,SVS.pet,SVS.petStart,SVS.now)!=='dead';
+    const mem=SS.members.find(m=>m.id===mid);if(!mem)return'';
+    const isActive=SS.active.includes(mid);
+    const hasPet=SS.pet[mid]&&petSt(mid,SS)!=='dead';
     const march=hasPet?pms[idx]:ms[idx];
-    return`<div style="background:var(--bg2);border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:var(--radius-lg);padding:12px;margin-bottom:8px;opacity:${isActive?1:0.5}">
-      <div class="row" style="margin-bottom:${isActive?'10':'0'}px">
-        <div style="flex:1">
-          <div style="font-size:15px;font-weight:700">${mem.name}</div>
-          <div style="font-size:11px;color:var(--text3)">都市${idx+1} — <span style="color:${isActive?(hasPet?'var(--green)':'var(--accent)'):'var(--text3)'};font-weight:700;font-size:15px">${march}</span>秒${hasPet?' 🟢':''}</div>
-        </div>
+    const st=petSt(mid,SS);
+    const pc={off:'p-off',on:'p-on',warn:'p-warn',low:'p-low',dead:'p-dead'}[st];
+    return`<div style="background:var(--bg2);border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:12px;padding:12px;margin-bottom:8px;opacity:${isActive?1:0.5}">
+      <div class="row" style="margin-bottom:${isActive?'8':'0'}px">
+        <div style="flex:1"><div style="font-size:15px;font-weight:700">${mem.name}</div>
+        <div style="font-size:11px;color:var(--text3)">都市${idx+1} — <span style="color:${isActive?(hasPet?'var(--green)':'var(--accent)'):'var(--text3)'};font-weight:700;font-size:15px">${march}</span>秒${hasPet?' 🟢':''}</div></div>
         <div class="chip" data-t="${mem.team}">${mem.team}</div>
-        <button class="btn btn-sm ${isActive?'btn-danger':'btn-success'}" style="width:80px;flex-shrink:0" onclick="svsToggleActive(${mid})">${isActive?'不参加':'参戦'}</button>
+        <button class="btn btn-sm ${isActive?'btn-danger':'btn-success'}" style="width:80px;flex-shrink:0" onclick="sToggleActive(${mid})">${isActive?'不参加':'参戦'}</button>
       </div>
       ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
-        ${petRow(mid,SVS.pet,SVS.petStart,SVS.now,'svsTp','svsSetPetT','svsSetPetN')}
-        <select class="inp" style="height:30px;font-size:12px;margin-top:6px" onchange="svsCTeam(${mid},this.value)">
-          ${TEAMS.map(t=>`<option value="${t}" ${mem.team===t?'selected':''}>${t}</option>`).join('')}
-        </select>
+      <!-- 行軍時間微調整 -->
+      <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;flex-wrap:wrap">
+        <div style="font-size:11px;color:var(--text2);width:52px;flex-shrink:0">通常調整</div>
+        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',-1)">－</button>
+        <div style="font-size:14px;font-weight:700;min-width:60px;text-align:center;color:var(--accent)">
+          ${sGetBaseMarch(mid)}${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:11px;color:${(SS.adjust[mid]?.march||0)>0?'var(--orange)':'#58a6ff'}">(${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0})</span>`:''}
+          =${march}秒
+        </div>
+        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',1)">＋</button>
+        ${(SS.adjust[mid]?.march||0)!==0?`<button class="btn btn-xs" style="width:40px;padding:0;font-size:10px;flex-shrink:0" onclick="sAdjust(${mid},'march',-(SS.adjust[${mid}]?.march||0))">reset</button>`:''}
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
+        <div style="font-size:11px;color:var(--green);width:52px;flex-shrink:0">🐾調整</div>
+        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
+        <div style="font-size:14px;font-weight:700;min-width:60px;text-align:center;color:var(--green)">
+          ${sGetBasePetMarch(mid)}${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:11px;color:${(SS.adjust[mid]?.petMarch||0)>0?'var(--orange)':'#58a6ff'}">(${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0})</span>`:''}
+          =${sGetBasePetMarch(mid)+(SS.adjust[mid]?.petMarch||0)}秒
+        </div>
+        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
+        ${(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="width:40px;padding:0;font-size:10px;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-(SS.adjust[${mid}]?.petMarch||0))">reset</button>`:''}
+      </div>`:''}
+      ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
+        <div class="row" style="margin-bottom:${SS.pet[mid]?'6':'0'}px">
+          <span class="tag ${pc}">${petLbl(mid,SS)}</span>
+          <button class="btn btn-xs" style="width:74px" onclick="sTp(${mid})">${SS.pet[mid]?'停止':'ペットON'}</button>
+          <select class="inp" style="height:30px;font-size:12px;flex:1" onchange="sCTeam(${mid},this.value)">
+            ${TEAMS.map(t=>`<option value="${t}" ${mem.team===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        ${SS.pet[mid]?`<div class="ptp">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
+          <div class="row" style="margin-bottom:4px">
+            <input class="tinp" type="time" value="${fmtT(mid,SS)}" onchange="sSpetT(${mid},this.value)"/>
+            <button class="btn btn-xs" style="width:64px" onclick="sSpetN(${mid})">今すぐ</button>
+            <span style="font-size:11px;color:var(--text2)">から2時間</span>
+          </div>
+          <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(mid,SS)}</div>
+        </div>`:''}
       </div>`:''}
     </div>`;
   }).join('')}`;
@@ -485,207 +529,36 @@ ${['A','B'].map((face,fi)=>{
 ${entries.length===0?`<div class="empty" style="padding:40px 0"><div style="font-size:14px;margin-bottom:8px">都市割当がありません</div><div style="font-size:12px">① 事前設定で割り当ててください</div></div>`:''}`;
 }
 
-function renderSVSCalc(el){
-  const ac=SVS.members.filter(m=>SVS.active.includes(m.id));
-  const all=svsCalcHits(ac);
+function rSvsCalc(el){
+  const ac=SS.members.filter(m=>SS.active.includes(m.id));
+  const all=sCalcHits(ac);
   const teams=[...new Set(ac.map(m=>m.team))].sort();
   el.innerHTML=`
 <div class="card">
   <div class="sec">全体同時着弾</div>
   ${all.length?`
-  <div style="background:var(--bg3);border-radius:var(--radius);padding:12px;margin-bottom:10px">
+  <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:10px">
     <div style="font-size:11px;color:var(--text3)">基準（最短行軍）</div>
-    <div style="font-size:44px;font-weight:700;color:var(--accent);line-height:1">${Math.min(...all.map(r=>r.march))}<span style="font-size:16px">秒</span></div>
-    <div style="font-size:11px;color:var(--text2);margin-top:4px">${svsFactionLabel()} — 参戦${ac.length}名</div>
+    <div style="font-size:42px;font-weight:700;color:var(--accent);line-height:1">${Math.min(...all.map(r=>r.march))}<span style="font-size:16px">秒</span></div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">${sFactionLabel()} — 参戦${ac.length}名</div>
   </div>
   ${all.map(r=>{
-    const info=svsGetMemberCityInfo(r.id);
-    const face=info?svsFaceLabel(info.face):'?';
-    const hasPet=SVS.pet[r.id]&&petSt(r.id,SVS.pet,SVS.petStart,SVS.now)!=='dead';
-    return`<div style="display:flex;align-items:center;padding:10px;background:var(--bg3);border-radius:var(--radius);margin-bottom:6px;border-left:4px solid ${r.wait===0?'var(--green)':'var(--accent)'}">
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600">${r.name}</div>
-        <div style="font-size:11px;color:var(--text3)">${face} 都市${info?info.idx+1:'?'} — ${r.march}秒${hasPet?' 🟢':''}</div>
-      </div>
+    const info=sGetCityIdx(r.id);const face=info?.face;
+    const hasPet=SS.pet[r.id]&&petSt(r.id,SS)!=='dead';
+    return`<div style="display:flex;align-items:center;padding:10px;background:var(--bg3);border-radius:8px;margin-bottom:6px;border-left:4px solid ${r.wait===0?'var(--green)':'var(--accent)'}">
+      <div style="flex:1"><div style="font-size:14px;font-weight:600">${r.name}</div>
+      <div style="font-size:11px;color:var(--text3)">${face?sFaceLabel(face):''} 都市${info?info.idx+1:'?'} — ${r.march}秒${hasPet?' 🟢':''}</div></div>
       <div class="chip" data-t="${r.team}" style="margin-right:10px">${r.team}</div>
-      <div style="text-align:right">
-        <div style="font-size:40px;font-weight:700;line-height:1;color:${r.wait===0?'var(--green)':'var(--text)'}">${r.wait}</div>
-        <div style="font-size:11px;color:var(--text3)">秒後</div>
-      </div>
+      <div style="text-align:right"><div style="font-size:38px;font-weight:700;line-height:1;color:${r.wait===0?'var(--green)':'var(--text)'}">${r.wait}</div>
+      <div style="font-size:11px;color:var(--text3)">秒後</div></div>
     </div>`;
   }).join('')}`:`<div class="empty">② 当日参戦タブで参戦メンバーを確定してください</div>`}
 </div>
-${all.length&&teams.length>1?`<div class="card">
-  <div class="sec">チーム別同時着弾</div>
+${all.length&&teams.length>1?`<div class="card"><div class="sec">チーム別同時着弾</div>
   ${teams.map(t=>{
-    const tr=svsCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return'';
+    const tr=sCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return'';
     return`<div class="bsec" style="border-left-color:${tc(t)};margin-bottom:10px">
-      <div style="font-size:13px;font-weight:700;color:${tc(t)};margin-bottom:6px">チーム ${t}</div>
-      ${tr.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
-        <div style="flex:1;font-size:13px;font-weight:600">${r.name}</div>
-        <div style="font-size:11px;color:var(--text2);margin-right:10px">${r.march}秒</div>
-        <div style="font-size:28px;font-weight:700;color:${r.wait===0?'var(--green)':'var(--text)'}">${r.wait}<span style="font-size:11px;color:var(--text3)">秒後</span></div>
-      </div>`).join('')}
-    </div>`;
-  }).join('')}
-</div>`:''}`;
-}
-
-function renderSVSCopy(el){
-  const ac=SVS.members.filter(m=>SVS.active.includes(m.id));
-  const all=svsCalcHits(ac);
-  const at=all.map(r=>`${r.name} ${r.wait}`).join('\n');
-  const teams=[...new Set(ac.map(m=>m.team))].sort();
-  const chunks=[];for(let i=0;i<teams.length;i+=2)chunks.push(teams.slice(i,i+2));
-  function makeTeamText(tList){
-    return tList.map(t=>{const tr=svsCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return null;return tr.map((r,i)=>i===0?`【${t}】${r.name} ${r.wait}`:`${r.name} ${r.wait}`).join('\n');}).filter(Boolean).join('\n');
-  }
-  el.innerHTML=`
-<div class="card"><div class="sec">全員版</div>
-  <div class="cpbox" id="cp-all">${at||'(参戦メンバー確定後に表示)'}</div>
-  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-all').textContent)">コピー</button>
-</div>
-${chunks.map((chunk,i)=>`<div class="card" style="margin-top:10px">
-  <div class="sec">チーム ${chunk.join('・')}（${i+1}回目）</div>
-  <div class="cpbox" id="cp-chunk-${i}">${makeTeamText(chunk)||'(なし)'}</div>
-  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-chunk-${i}').textContent)">コピー（${i+1}回目）</button>
-</div>`).join('')}
-${renderWhCard()}`;
-  renderWhList();
-}
-
-function renderSVSEnemy(el){
-  const ms=SVS.placementA==='6'?M6:M5;
-  el.innerHTML=`
-<div class="card"><div class="sec">敵情報入力</div>
-  <div class="row" style="margin-bottom:8px"><input class="inp fl1" id="en" placeholder="敵名"/></div>
-  <div class="row" style="margin-bottom:8px">
-    <select class="inp fl1" id="em">${ms.map((m,i)=>`<option value="${m}">都市${i+1}: ${m}秒</option>`).join('')}</select>
-    <label class="tgl"><input type="checkbox" id="ep"/><span class="tsl"></span></label>
-    <span style="font-size:12px;color:var(--text2)">ペット</span>
-  </div>
-  <button class="btn btn-primary btn-sm" onclick="addE()">追加</button>
-</div>
-${renderEnemyList(SVS.enemies,'svs')}`;
-}
-
-// SVS モーダル
-function svsOpenModal(key,face,idx){SVS.selCity={key,face,idx};SVS.modal='city';renderSVSModal();}
-function renderSVSModal(){
-  let ov=document.getElementById('mov');
-  if(!ov){ov=document.createElement('div');ov.id='mov';ov.className='mov';ov.onclick=e=>{if(e.target===ov){SVS.modal=null;ov.remove();}};document.body.appendChild(ov);}
-  const{key,face,idx}=SVS.selCity;
-  const ms=svsMarchList(face),pms=svsPetMarchList(face);
-  const cur=SVS.cityAssign[key];
-  ov.innerHTML=`<div class="modal">
-    <div style="font-size:15px;font-weight:700;margin-bottom:4px">${svsFaceLabel(face)} 都市${idx+1} — 集結主を選択</div>
-    <div style="background:var(--bg3);border-radius:var(--radius);padding:12px;margin-bottom:12px;display:flex">
-      <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">通常行軍</div><div style="font-size:36px;font-weight:700;color:var(--accent);line-height:1">${ms[idx]}<span style="font-size:13px">秒</span></div></div>
-      <div style="width:1px;background:var(--border)"></div>
-      <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">ペット行軍</div><div style="font-size:36px;font-weight:700;color:var(--green);line-height:1">${pms[idx]}<span style="font-size:13px">秒</span></div></div>
-    </div>
-    ${cur?`<button class="btn btn-sm btn-danger" style="margin-bottom:10px" onclick="svsAsgn('${key}',null)">割当解除</button>`:''}
-    ${SVS.members.map(m=>{
-      const isCur=SVS.cityAssign[key]===m.id;
-      const info=svsGetMemberCityInfo(m.id);
-      const isOther=info&&info.key!==key;
-      return`<div style="display:flex;align-items:center;padding:12px;background:${isCur?'#1a2a3a':'var(--bg3)'};border-radius:var(--radius);margin-bottom:6px;cursor:pointer;border:1px solid ${isCur?'var(--accent)':'var(--border)'}" onclick="svsAsgn('${key}',${m.id})">
-        <div style="flex:1"><div style="font-size:14px;font-weight:600">${m.name} ${isCur?'✓':''}</div>
-        <div style="font-size:11px;color:${isOther?'var(--orange)':'var(--text3)'}">
-          ${isCur?'現在割当中':isOther?`${svsFaceLabel(info.face)} 都市${info.idx+1}から移動`:'未割当'}
-        </div></div>
-      </div>`;
-    }).join('')||'<div class="empty">メンバーを先に登録してください</div>'}
-  </div>`;
-}
-function svsAsgn(key,id){
-  if(id){if(SVS.cityAssign[key]===id)delete SVS.cityAssign[key];else{for(const k of Object.keys(SVS.cityAssign)){if(SVS.cityAssign[k]===id)delete SVS.cityAssign[k];}SVS.cityAssign[key]=id;}}
-  else delete SVS.cityAssign[key];
-  SVS.modal=null;document.getElementById('mov')?.remove();render();
-}
-
-// ============================================================
-// FROST 画面レンダリング
-// ============================================================
-function renderFrostBattle(el){
-  const waiting=FROST.members.filter(m=>!FROST.active.includes(m.id));
-  const active=FROST.members.filter(m=>FROST.active.includes(m.id));
-  el.innerHTML=`
-<div class="card">
-  <div class="sec">集結主登録 (${FROST.members.length}/20名)</div>
-  <div class="row" style="margin-bottom:8px">
-    <input class="inp fl1" id="frost-nn" placeholder="名前を入力"/>
-    <button class="btn btn-sm btn-ice" style="width:80px;flex-shrink:0" onclick="frostAddM()">追加</button>
-  </div>
-</div>
-<div class="card">
-  <div class="sec">待機中 (${waiting.length}名)</div>
-  ${waiting.length?waiting.map(m=>`
-  <div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
-    <div style="flex:1;font-size:14px;font-weight:600">${m.name}</div>
-    <button class="btn btn-sm btn-success" style="width:80px;flex-shrink:0" onclick="frostJoin(${m.id})">参戦</button>
-    <button class="btn btn-sm btn-danger" style="width:34px;flex-shrink:0;padding:0;margin-left:6px" onclick="frostRmv(${m.id})">✕</button>
-  </div>`).join(''):'<div class="empty">待機中なし</div>'}
-</div>
-<div class="card">
-  <div class="sec">参戦中 (${active.length}名)</div>
-  ${active.length?active.map(m=>{
-    const eff=frostGetEffectiveMarch(m.id);
-    const hasPet=FROST.pet[m.id]&&petSt(m.id,FROST.pet,FROST.petStart,FROST.now)!=='dead';
-    return`<div style="padding:10px 0;border-bottom:1px solid var(--border)">
-      <div class="row" style="margin-bottom:8px">
-        <div style="flex:1">
-          <div style="font-size:15px;font-weight:700">${m.name}</div>
-          ${eff?`<div style="font-size:11px;color:${hasPet?'var(--green)':'var(--ice)'}">有効行軍: ${eff}秒${hasPet?' 🟢':''}</div>`:'<div style="font-size:11px;color:var(--text3)">行軍時間未入力</div>'}
-        </div>
-        <div class="chip" data-t="${m.team}">${m.team}</div>
-        <button class="btn btn-xs btn-danger" style="width:36px;padding:0;flex-shrink:0" onclick="frostLv(${m.id})">離脱</button>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-        <div style="font-size:11px;color:var(--text2);width:56px;flex-shrink:0">通常</div>
-        <input class="inp-num" type="number" placeholder="秒" value="${m.march||''}" onchange="frostSetMarch(${m.id},'march',this.value)" style="width:80px"/>
-        <div style="font-size:11px;color:var(--green);width:56px;flex-shrink:0">🐾ペット</div>
-        <input class="inp-num" type="number" placeholder="秒" value="${m.petMarch||''}" onchange="frostSetMarch(${m.id},'petMarch',this.value)" style="width:80px"/>
-      </div>
-      ${petRow(m.id,FROST.pet,FROST.petStart,FROST.now,'frostTp','frostSetPetT','frostSetPetN')}
-      <select class="inp" style="height:30px;font-size:12px;margin-top:6px" onchange="frostCTeam(${m.id},this.value)">
-        ${TEAMS.map(t=>`<option value="${t}" ${m.team===t?'selected':''}>${t}</option>`).join('')}
-      </select>
-    </div>`;
-  }).join(''):'<div class="empty">参戦中なし</div>'}
-</div>`;
-}
-
-function renderFrostCalc(el){
-  const ac=FROST.members.filter(m=>FROST.active.includes(m.id));
-  const all=frostCalcHits(ac);
-  const teams=[...new Set(ac.map(m=>m.team))].sort();
-  el.innerHTML=`
-<div class="card">
-  <div class="sec">全体同時着弾</div>
-  ${all.length?`
-  <div style="background:var(--bg3);border-radius:var(--radius);padding:12px;margin-bottom:10px">
-    <div style="font-size:11px;color:var(--text3)">基準（最短行軍）</div>
-    <div style="font-size:40px;font-weight:700;color:var(--ice);line-height:1">${Math.min(...all.map(r=>r.march))}<span style="font-size:16px">秒</span></div>
-  </div>
-  ${all.map(r=>{
-    const hasPet=FROST.pet[r.id]&&petSt(r.id,FROST.pet,FROST.petStart,FROST.now)!=='dead';
-    return`<div style="display:flex;align-items:center;padding:10px;background:var(--bg3);border-radius:var(--radius);margin-bottom:6px;border-left:4px solid ${r.wait===0?'var(--green)':'var(--ice)'}">
-      <div style="flex:1"><div style="font-size:14px;font-weight:600">${r.name}</div><div style="font-size:11px;color:var(--text3)">${r.march}秒${hasPet?' 🟢':''}</div></div>
-      <div class="chip" data-t="${r.team}" style="margin-right:10px">${r.team}</div>
-      <div style="text-align:right">
-        <div style="font-size:38px;font-weight:700;line-height:1;color:${r.wait===0?'var(--green)':'var(--text)'}">${r.wait}</div>
-        <div style="font-size:11px;color:var(--text3)">秒後</div>
-      </div>
-    </div>`;
-  }).join('')}`:`<div class="empty">行軍時間を入力してください</div>`}
-</div>
-${all.length&&teams.length>1?`<div class="card">
-  <div class="sec">チーム別同時着弾</div>
-  ${teams.map(t=>{
-    const tr=frostCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return'';
-    return`<div class="bsec" style="border-left-color:${tc(t)};margin-bottom:10px">
-      <div style="font-size:13px;font-weight:700;color:${tc(t)};margin-bottom:6px">チーム ${t}</div>
+      <div style="font-size:13px;font-weight:700;color:${tc(t)};margin-bottom:6px">チーム ${t} — 基準: ${Math.min(...tr.map(r=>r.march))}秒</div>
       ${tr.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
         <div style="flex:1;font-size:13px;font-weight:600">${r.name}</div>
         <div style="font-size:11px;color:var(--text2);margin-right:10px">${r.march}秒</div>
@@ -696,50 +569,264 @@ ${all.length&&teams.length>1?`<div class="card">
 </div>`:''}`;
 }
 
-function renderFrostCopy(el){
-  const ac=FROST.members.filter(m=>FROST.active.includes(m.id));
-  const all=frostCalcHits(ac);
-  const at=all.map(r=>`${r.name} ${r.wait}`).join('\n');
+function rSvsCopy(el){
+  const ac=SS.members.filter(m=>SS.active.includes(m.id));
+  const all=sCalcHits(ac);
   const teams=[...new Set(ac.map(m=>m.team))].sort();
+  const at=all.map(r=>`${r.name} ${r.wait}`).join('\n');
   const chunks=[];for(let i=0;i<teams.length;i+=2)chunks.push(teams.slice(i,i+2));
-  function makeTeamText(tList){
-    return tList.map(t=>{const tr=frostCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return null;return tr.map((r,i)=>i===0?`【${t}】${r.name} ${r.wait}`:`${r.name} ${r.wait}`).join('\n');}).filter(Boolean).join('\n');
-  }
+  function makeTeamText(tList){return tList.map(t=>{const tr=sCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return null;return tr.map((r,i)=>i===0?`【${t}】${r.name} ${r.wait}`:`${r.name} ${r.wait}`).join('\n');}).filter(Boolean).join('\n');}
   el.innerHTML=`
 <div class="card"><div class="sec">全員版</div>
-  <div class="cpbox" id="cp-all">${at||'(参戦メンバーの行軍時間を入力後に表示)'}</div>
+  <div class="cpbox" id="cp-all">${at||'(参戦メンバー確定後に表示)'}</div>
   <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-all').textContent)">コピー</button>
 </div>
-${chunks.map((chunk,i)=>`<div class="card" style="margin-top:10px">
-  <div class="sec">チーム ${chunk.join('・')}（${i+1}回目）</div>
-  <div class="cpbox" id="cp-chunk-${i}">${makeTeamText(chunk)||'(なし)'}</div>
-  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-chunk-${i}').textContent)">コピー（${i+1}回目）</button>
+${chunks.map((chunk,i)=>`<div class="card" style="margin-top:10px"><div class="sec">チーム ${chunk.join('・')}（${i+1}回目）</div>
+  <div class="cpbox" id="cp-c${i}">${makeTeamText(chunk)||'(なし)'}</div>
+  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-c${i}').textContent)">コピー（${i+1}回目）</button>
 </div>`).join('')}
-${renderWhCard()}`;
+${renderWhUI('svs')}`;
   renderWhList();
 }
 
-function renderFrostEnemy(el){
+function sGetPetMarchByIdx(placementKey, idx){
+  return placementKey==='6'?P6[idx]:P5[idx];
+}
+function sEnemyPetMarch(){
+  // プルダウンの選択インデックスからペット行軍を自動計算
+  const sel=document.getElementById('em');
+  if(!sel)return null;
+  const idx=sel.selectedIndex;
+  const placement=SS.placementA; // 面Aの配置を基準
+  return sGetPetMarchByIdx(placement,idx);
+}
+function updateEnemyPetDisplay(){
+  const pm=sEnemyPetMarch();
+  const el=document.getElementById('enemy-pet-march');
+  if(el)el.textContent=pm?`ペット行軍: ${pm}秒`:'';
+}
+function rSvsEnemy(el){
+  const ms6=[...M6,...M5].filter((v,i,a)=>a.indexOf(v)===i);
+  const allOptions=[
+    ...M6.map((m,i)=>`<option value="${i}_6">6都市 都市${i+1}: ${m}秒 / ペット${P6[i]}秒</option>`),
+    ...M5.map((m,i)=>`<option value="${i}_5">5都市 都市${i+1}: ${m}秒 / ペット${P5[i]}秒</option>`),
+  ];
+  el.innerHTML=`
+<div class="card"><div class="sec">敵情報入力</div>
+  <div class="row" style="margin-bottom:8px"><input class="inp fl1" id="en" placeholder="敵名"/></div>
+  <div class="row" style="margin-bottom:6px">
+    <select class="inp fl1" id="em" onchange="updateEnemyInfo()">
+      ${allOptions.join('')}
+    </select>
+  </div>
+  <div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;gap:16px;align-items:center">
+    <div id="enemy-march-disp" style="font-size:13px;color:var(--text)">都市1: 43秒</div>
+    <div id="enemy-pet-disp" style="font-size:13px;color:var(--green)">ペット: 37秒</div>
+    <label class="tgl" style="margin-left:auto"><input type="checkbox" id="ep"/><span class="tsl"></span></label>
+    <span style="font-size:12px;color:var(--text2)">ペット</span>
+  </div>
+  <button class="btn btn-primary btn-sm" onclick="sAddE()">追加</button>
+</div>
+<div class="card" style="margin-top:10px"><div class="sec">敵一覧 (${SS.enemies.length}件)</div>
+  ${SS.enemies.length?SS.enemies.map((e,i)=>`<div class="er">
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:600">${e.name}</div>
+      <div style="font-size:11px;color:var(--text3)">${e.pet?`🟢ペット ${e.petMarch}秒`:`通常 ${e.march}秒`}</div>
+    </div>
+    <div style="text-align:right;margin-right:8px">
+      <div style="font-size:13px;font-weight:700;color:var(--red)">${e.march}秒</div>
+      <div style="font-size:11px;color:var(--green)">${e.petMarch}秒</div>
+    </div>
+    <span class="tag ${e.pet?'p-on':'p-off'}">${e.pet?'🟢ペット':'⚪'}</span>
+    <button class="btn btn-xs btn-danger" style="width:30px;padding:0;margin-left:4px" onclick="sRmE(${i})">✕</button>
+  </div>`).join(''):'<div class="empty">敵情報なし</div>'}
+</div>`;
+  updateEnemyInfo();
+}
+function updateEnemyInfo(){
+  const sel=document.getElementById('em');if(!sel)return;
+  const[idxStr,placement]=sel.value.split('_');
+  const idx=parseInt(idxStr);
+  const ms=placement==='6'?M6:M5;const ps=placement==='6'?P6:P5;
+  const md=document.getElementById('enemy-march-disp');
+  const pd=document.getElementById('enemy-pet-disp');
+  if(md)md.textContent=`通常: ${ms[idx]}秒`;
+  if(pd)pd.textContent=`ペット: ${ps[idx]}秒`;
+}
+
+// ============================================================
+// 霜竜 タブ実装
+// ============================================================
+function rFrostBattle(el){
+  const waiting=FS.members.filter(m=>!FS.active.includes(m.id));
+  const active=FS.members.filter(m=>FS.active.includes(m.id));
+  el.innerHTML=`
+<div class="card">
+  <div class="sec">集結主登録 (${FS.members.length}/20名)</div>
+  <div class="row" style="margin-bottom:8px">
+    <input class="inp fl1" id="fnn" placeholder="名前を入力"/>
+    <button class="btn btn-sm btn-primary" style="width:80px;flex-shrink:0" onclick="fAddM()">追加</button>
+  </div>
+</div>
+<div class="card">
+  <div class="sec">待機中 (${waiting.length}名)</div>
+  ${waiting.length?waiting.map(m=>`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+    <div style="flex:1;font-size:14px;font-weight:600">${m.name}</div>
+    <button class="btn btn-sm btn-success" style="width:80px;flex-shrink:0" onclick="fJoin(${m.id})">参戦</button>
+    <button class="btn btn-sm btn-danger" style="width:34px;flex-shrink:0;padding:0;margin-left:6px" onclick="fRmv(${m.id})">✕</button>
+  </div>`).join(''):'<div class="empty">待機中なし</div>'}
+</div>
+<div class="card">
+  <div class="sec">参戦中 (${active.length}名)</div>
+  ${active.length?active.map(m=>{
+    const st=petSt(m.id,FS);
+    const pc={off:'p-off',on:'p-on',warn:'p-warn',low:'p-low',dead:'p-dead'}[st];
+    const eff=fGetMarch(m.id);const hasPet=FS.pet[m.id]&&st!=='dead';
+    return`<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="row" style="margin-bottom:8px">
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700">${m.name}</div>
+          ${eff?`<div style="font-size:11px;color:${hasPet?'var(--green)':'var(--accent)'}">有効行軍: ${eff}秒${hasPet?' 🟢':''}</div>`:'<div style="font-size:11px;color:var(--text3)">行軍時間未入力</div>'}
+        </div>
+        <div class="chip" data-t="${m.team}">${m.team}</div>
+        <button class="btn btn-xs btn-danger" style="width:36px;padding:0;flex-shrink:0" onclick="fLv(${m.id})">離脱</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+        <div style="font-size:11px;color:var(--text2);width:40px;flex-shrink:0">通常</div>
+        <input class="inp-num" type="number" placeholder="秒" value="${m.march||''}" onchange="fSetMarch(${m.id},'march',this.value)"/>
+        <div style="font-size:11px;color:var(--green);width:52px;flex-shrink:0">🐾ペット</div>
+        <input class="inp-num" type="number" placeholder="秒" value="${m.petMarch||''}" onchange="fSetMarch(${m.id},'petMarch',this.value)"/>
+        <div style="font-size:11px;color:var(--text3)">秒</div>
+      </div>
+      <div class="row" style="margin-bottom:${FS.pet[m.id]?'6':'0'}px">
+        <span class="tag ${pc}">${petLbl(m.id,FS)}</span>
+        <button class="btn btn-xs" style="width:74px" onclick="fTp(${m.id})">${FS.pet[m.id]?'停止':'ペットON'}</button>
+        <select class="inp" style="height:30px;font-size:12px;flex:1" onchange="fCTeam(${m.id},this.value)">
+          ${TEAMS.map(t=>`<option value="${t}" ${m.team===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      ${FS.pet[m.id]?`<div class="ptp">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
+        <div class="row" style="margin-bottom:4px">
+          <input class="tinp" type="time" value="${fmtT(m.id,FS)}" onchange="fSpetT(${m.id},this.value)"/>
+          <button class="btn btn-xs" style="width:64px" onclick="fSpetN(${m.id})">今すぐ</button>
+          <span style="font-size:11px;color:var(--text2)">から2時間</span>
+        </div>
+        <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(m.id,FS)}</div>
+      </div>`:''}
+    </div>`;
+  }).join(''):'<div class="empty">参戦中なし</div>'}
+</div>`;
+}
+
+function rFrostCalc(el){
+  const ac=FS.members.filter(m=>FS.active.includes(m.id));
+  const all=fCalcHits(ac);const teams=[...new Set(ac.map(m=>m.team))].sort();
+  const wm=ac.map(m=>({...m,march:fGetMarch(m.id)})).filter(m=>m.march!==null&&m.march>0);
+  const{base,baseMember}=wm.length?fGetBase(wm):{base:null,baseMember:null};
+
+  el.innerHTML=`
+<div class="card">
+  <div class="sec">全体同時着弾</div>
+  ${all.length?`
+  <!-- 基準選択 -->
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">基準集結主</div>
+    <div class="row" style="margin-bottom:6px">
+      <select class="inp fl1" id="frost-base-sel" onchange="fSetBase(this.value)" style="height:36px;font-size:13px;">
+        <option value="">最短行軍（自動）</option>
+        ${ac.filter(m=>fGetMarch(m.id)).map(m=>`<option value="${m.id}" ${FS.baseId===m.id?'selected':''}>${m.name}（${fGetMarch(m.id)}秒）</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:flex;gap:16px;align-items:center">
+      <div style="font-size:13px;font-weight:700;color:var(--accent)">${baseMember?baseMember.name:'—'}</div>
+      <div style="font-size:20px;font-weight:700;color:var(--accent)">${base||'—'}<span style="font-size:12px;color:var(--text3)">秒</span></div>
+      <div style="font-size:11px;color:var(--text3)">基準（0カウント）</div>
+    </div>
+  </div>
+  ${all.map(r=>{
+    const hasPet=FS.pet[r.id]&&petSt(r.id,FS)!=='dead';
+    const isBase=r.id===baseMember?.id||(FS.baseId===null&&r.wait===0&&r.march===base);
+    const countColor=r.wait>0?'var(--text)':r.wait<0?'#f0a500':'var(--green)';
+    const borderColor=isBase?'var(--green)':r.wait>0?'var(--accent)':'#f0a500';
+    return`<div style="display:flex;align-items:center;padding:10px;background:var(--bg3);border-radius:8px;margin-bottom:6px;border-left:4px solid ${borderColor}">
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${r.name}${isBase?' 🎯':''}</div>
+        <div style="font-size:11px;color:var(--text3)">${r.march}秒${hasPet?' 🟢':''}</div>
+      </div>
+      <div class="chip" data-t="${r.team}" style="margin-right:10px">${r.team}</div>
+      <div style="text-align:right;min-width:50px">
+        <div style="font-size:38px;font-weight:700;line-height:1;color:${countColor}">${r.countLabel}</div>
+        <div style="font-size:10px;color:var(--text3)">${r.wait>0?'カウント':r.wait<0?'後出し':''}</div>
+      </div>
+    </div>`;
+  }).join('')}`:`<div class="empty">行軍時間を入力してください</div>`}
+</div>
+${all.length&&teams.length>1?`<div class="card"><div class="sec">チーム別同時着弾</div>
+  ${teams.map(t=>{
+    const tr=fCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return'';
+    const trWm=ac.filter(m=>m.team===t).map(m=>({...m,march:fGetMarch(m.id)})).filter(m=>m.march);
+    const{base:tb,baseMember:tbm}=trWm.length?fGetBase(trWm):{base:0,baseMember:null};
+    return`<div class="bsec" style="border-left-color:${tc(t)};margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:${tc(t)};margin-bottom:4px">チーム ${t}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">基準: ${tbm?tbm.name:'—'} ${tb}秒</div>
+      ${tr.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:13px;font-weight:600">${r.name}</div>
+        <div style="font-size:11px;color:var(--text2);margin-right:10px">${r.march}秒</div>
+        <div style="font-size:24px;font-weight:700;color:${r.wait>0?'var(--text)':r.wait<0?'#f0a500':'var(--green)'}">${r.countLabel}</div>
+      </div>`).join('')}
+    </div>`;}).join('')}
+</div>`:''}`;
+}
+function fSetBase(id){FS.baseId=id?parseInt(id):null;render();}
+
+function rFrostCopy(el){
+  const ac=FS.members.filter(m=>FS.active.includes(m.id));
+  const all=fCalcHits(ac);const teams=[...new Set(ac.map(m=>m.team))].sort();
+  const at=all.map(r=>`${r.name} ${r.wait}`).join('\n');
+  const chunks=[];for(let i=0;i<teams.length;i+=2)chunks.push(teams.slice(i,i+2));
+  function makeTeamText(tList){return tList.map(t=>{const tr=fCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return null;return tr.map((r,i)=>i===0?`【${t}】${r.name} ${r.wait}`:`${r.name} ${r.wait}`).join('\n');}).filter(Boolean).join('\n');}
+  el.innerHTML=`
+<div class="card"><div class="sec">全員版</div>
+  <div class="cpbox" id="cp-all">${at||'(行軍時間入力後に表示)'}</div>
+  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-all').textContent)">コピー</button>
+</div>
+${chunks.map((chunk,i)=>`<div class="card" style="margin-top:10px"><div class="sec">チーム ${chunk.join('・')}（${i+1}回目）</div>
+  <div class="cpbox" id="cp-c${i}">${makeTeamText(chunk)||'(なし)'}</div>
+  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-c${i}').textContent)">コピー（${i+1}回目）</button>
+</div>`).join('')}
+${renderWhUI('frost')}`;
+  renderWhList();
+}
+
+function rFrostEnemy(el){
   el.innerHTML=`
 <div class="card"><div class="sec">敵情報入力</div>
   <div class="row" style="margin-bottom:8px"><input class="inp fl1" id="en" placeholder="敵集結主名"/></div>
   <div class="row" style="margin-bottom:8px">
     <span style="font-size:12px;color:var(--text2);width:40px">行軍</span>
-    <input class="inp-num" id="em" type="number" placeholder="秒" style="width:80px"/>
+    <input class="inp-num" id="em" type="number" placeholder="秒"/>
     <label class="tgl" style="margin-left:8px"><input type="checkbox" id="ep"/><span class="tsl"></span></label>
     <span style="font-size:12px;color:var(--text2)">ペット</span>
   </div>
-  <button class="btn btn-primary btn-sm" onclick="addE()">追加</button>
+  <button class="btn btn-primary btn-sm" onclick="fAddE()">追加</button>
 </div>
-${renderEnemyList(FROST.enemies,'frost')}`;
+<div class="card" style="margin-top:10px"><div class="sec">敵一覧 (${FS.enemies.length}件)</div>
+  ${FS.enemies.length?FS.enemies.map((e,i)=>`<div class="er">
+    <div style="flex:1;font-size:14px;font-weight:600">${e.name}</div>
+    <div style="font-size:14px;font-weight:700;color:var(--red);min-width:42px">${e.march}秒</div>
+    <span class="tag ${e.pet?'p-on':'p-off'}">${e.pet?'🟢ペットON':'⚪OFF'}</span>
+    <button class="btn btn-xs btn-danger" style="width:30px;padding:0" onclick="fRmE(${i})">✕</button>
+  </div>`).join(''):'<div class="empty">敵情報なし</div>'}
+</div>`;
 }
 
 // ============================================================
-// Webhook（共通）
+// Webhook 共通UI
 // ============================================================
-let webhooks=JSON.parse(localStorage.getItem('unified_webhooks')||'[]');
+let webhooks=JSON.parse(localStorage.getItem('app_webhooks')||'[]');
 let selectedWh=0;
-function saveWh(){localStorage.setItem('unified_webhooks',JSON.stringify(webhooks));}
+function saveWh(){localStorage.setItem('app_webhooks',JSON.stringify(webhooks));}
 function addWh(){
   const name=document.getElementById('wh-name')?.value?.trim();
   const url=document.getElementById('wh-url')?.value?.trim();
@@ -759,157 +846,135 @@ function renderWhList(){
     <button class="btn btn-xs btn-danger" style="width:36px;padding:0;flex-shrink:0" onclick="removeWh(selectedWh)">✕</button>
   </div>`;
 }
-function renderWhCard(){
+function renderWhUI(mode){
   return`<div class="card" style="margin-top:10px"><div class="sec">Discord送信</div>
   <div id="wh-list"></div>
-  <div style="background:var(--bg3);border-radius:var(--radius);padding:10px;margin-bottom:8px">
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:8px">
     <div style="font-size:11px;color:var(--text2);margin-bottom:6px">チャンネルを追加</div>
     <div class="row" style="margin-bottom:6px"><input class="inp fl1" id="wh-name" placeholder="チャンネル名" style="height:36px;font-size:13px;"/></div>
-    <div class="row"><input class="inp fl1" id="wh-url" placeholder="Webhook URL" style="height:36px;font-size:13px;"/><button class="btn btn-xs btn-success" style="width:60px;flex-shrink:0" onclick="addWh()">追加</button></div>
+    <div class="row"><input class="inp fl1" id="wh-url" placeholder="Webhook URL" style="height:36px;font-size:13px;"/>
+    <button class="btn btn-xs btn-success" style="width:60px;flex-shrink:0" onclick="addWh()">追加</button></div>
   </div>
-  <button class="btn btn-primary" onclick="sendD()">Discordへ送信</button>
+  <button class="btn btn-primary" onclick="sendD('${mode}')">Discordへ送信</button>
 </div>`;
 }
-function sendD(){
+function sendD(mode){
   if(!webhooks.length){toast('チャンネルを登録してください');return;}
   const url=webhooks[selectedWh]?.url;if(!url)return;
-  const isSVS=MODE==='svs';
-  const ac=(isSVS?SVS:FROST).members.filter(m=>(isSVS?SVS:FROST).active.includes(m.id));
-  const all=isSVS?svsCalcHits(ac):frostCalcHits(ac);
-  const teams=[...new Set(ac.map(m=>m.team))].sort();
-  const txt=teams.map(t=>{
-    const tr=isSVS?svsCalcHits(ac.filter(m=>m.team===t)):frostCalcHits(ac.filter(m=>m.team===t));
-    if(!tr.length)return null;
-    return tr.map((r,i)=>i===0?`**【${t}】**${r.name} ${r.wait}秒後`:`${r.name} ${r.wait}秒後`).join('\n');
-  }).filter(Boolean).join('\n');
-  const header=isSVS?`**⚔️ SVS同時着弾**\n${svsFactionLabel()}`:'**❄️ 霜竜同時着弾**';
-  fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:`${header}\n\n${txt}`})})
-    .then(r=>toast(r.ok?'Discord送信完了！':'送信失敗')).catch(()=>toast('送信エラー'));
-}
-
-// 敵情報共通
-function renderEnemyList(enemies, mode){
-  return`<div class="card" style="margin-top:10px"><div class="sec">敵一覧 (${enemies.length}件)</div>
-  ${enemies.length?enemies.map((e,i)=>`
-  <div class="er">
-    <div style="flex:1;font-size:14px;font-weight:600">${e.name}</div>
-    <div style="font-size:14px;font-weight:700;color:var(--red);min-width:42px">${e.march}秒</div>
-    <span class="tag ${e.pet?'p-on':'p-off'}">${e.pet?'🟢ペットON':'⚪OFF'}</span>
-    <button class="btn btn-xs btn-danger" style="width:30px;padding:0" onclick="rmE('${mode}',${i})">✕</button>
-  </div>`).join(''):'<div class="empty">敵情報なし</div>'}
-</div>`;
+  let txt='';
+  if(mode==='svs'){
+    const ac=SS.members.filter(m=>SS.active.includes(m.id));
+    const teams=[...new Set(ac.map(m=>m.team))].sort();
+    txt=teams.map(t=>{const tr=sCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return null;return tr.map((r,i)=>i===0?`**【${t}】**${r.name} ${r.wait}秒後`:`${r.name} ${r.wait}秒後`).join('\n');}).filter(Boolean).join('\n');
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:`**🎯 SVS同時着弾**\n${sFactionLabel()}\n\n${txt}`})}).then(r=>toast(r.ok?'Discord送信完了！':'送信失敗')).catch(()=>toast('送信エラー'));
+  } else {
+    const ac=FS.members.filter(m=>FS.active.includes(m.id));
+    const teams=[...new Set(ac.map(m=>m.team))].sort();
+    txt=teams.map(t=>{const tr=fCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return null;return tr.map((r,i)=>i===0?`**【${t}】**${r.name} ${r.wait}秒後`:`${r.name} ${r.wait}秒後`).join('\n');}).filter(Boolean).join('\n');
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:`**❄️ 霜竜同時着弾**\n\n${txt}`})}).then(r=>toast(r.ok?'Discord送信完了！':'送信失敗')).catch(()=>toast('送信エラー'));
+  }
 }
 
 // ============================================================
-// ACTIONS
+// SVS アクション
 // ============================================================
-// SVS
-function svsSetSplit(v){if(SVS.split===v)return;SVS.split=v;SVS.faction='blue';SVS.cityAssign={};render();}
-function svsSetFaction(v){if(SVS.faction===v)return;SVS.faction=v;SVS.cityAssign={};render();}
-function svsSetPA(v){if(SVS.placementA===v)return;SVS.placementA=v;for(const k of Object.keys(SVS.cityAssign)){if(k[0]==='A')delete SVS.cityAssign[k];}render();}
-function svsSetPB(v){if(SVS.placementB===v)return;SVS.placementB=v;for(const k of Object.keys(SVS.cityAssign)){if(k[0]==='B')delete SVS.cityAssign[k];}render();}
-function svsAddM(){
-  const n=document.getElementById('svs-nn')?.value?.trim();
+function sSplit(v){if(SS.split===v)return;SS.split=v;SS.faction='blue';SS.cityAssign={};render();}
+function sFaction(v){if(SS.faction===v)return;SS.faction=v;SS.cityAssign={};render();}
+function sPA(v){if(SS.placementA===v)return;SS.placementA=v;for(const k of Object.keys(SS.cityAssign)){if(k[0]==='A')delete SS.cityAssign[k];}render();}
+function sPB(v){if(SS.placementB===v)return;SS.placementB=v;for(const k of Object.keys(SS.cityAssign)){if(k[0]==='B')delete SS.cityAssign[k];}render();}
+function sAddM(){
+  const n=document.getElementById('snn')?.value?.trim();
   if(!n){toast('名前を入力してください');return;}
-  if(SVS.members.length>=20){toast('最大20名まで登録できます');return;}
-  if(SVS.members.find(m=>m.name===n)){toast('同じ名前が既に存在します');return;}
-  SVS.members.push({id:Date.now(),name:n,team:'A'});
-  document.getElementById('svs-nn').value='';render();
+  if(SS.members.length>=20){toast('最大20名まで登録できます');return;}
+  if(SS.members.find(m=>m.name===n)){toast('同じ名前が既に存在します');return;}
+  SS.members.push({id:Date.now(),name:n,team:'A'});
+  document.getElementById('snn').value='';render();
 }
-function svsRmv(id){SVS.members=SVS.members.filter(m=>m.id!==id);SVS.active=SVS.active.filter(a=>a!==id);for(const k of Object.keys(SVS.cityAssign)){if(SVS.cityAssign[k]===id)delete SVS.cityAssign[k];}render();}
-function svsToggleActive(mid){SVS.active.includes(mid)?SVS.active=SVS.active.filter(a=>a!==mid):SVS.active.push(mid);render();}
-function svsAllJoin(){SVS.active=[...new Set([...SVS.active,...Object.values(SVS.cityAssign)])];render();}
-function svsAllLeave(){SVS.active=[];render();}
-function svsTp(id){SVS.pet[id]?(SVS.pet[id]=false,delete SVS.petStart[id]):(SVS.pet[id]=true,SVS.petStart[id]=Date.now());render();}
-function svsCTeam(id,t){const m=SVS.members.find(m=>m.id===id);if(m)m.team=t;render();}
-function svsSetPetT(id,ts){const[h,mn]=ts.split(':').map(Number),now=new Date(),t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mn,0);if(t-now>43200000)t.setDate(t.getDate()-1);SVS.petStart[id]=t.getTime();render();}
-function svsSetPetN(id){SVS.petStart[id]=Date.now();render();}
-
-// FROST
-function frostAddM(){
-  const n=document.getElementById('frost-nn')?.value?.trim();
-  if(!n){toast('名前を入力してください');return;}
-  if(FROST.members.length>=20){toast('最大20名まで登録できます');return;}
-  if(FROST.members.find(m=>m.name===n)){toast('同じ名前が既に存在します');return;}
-  FROST.members.push({id:Date.now()+1,name:n,team:'A',march:null,petMarch:null});
-  document.getElementById('frost-nn').value='';render();
-}
-function frostRmv(id){FROST.members=FROST.members.filter(m=>m.id!==id);FROST.active=FROST.active.filter(a=>a!==id);delete FROST.pet[id];render();}
-function frostJoin(id){if(!FROST.active.includes(id))FROST.active.push(id);render();}
-function frostLv(id){FROST.active=FROST.active.filter(a=>a!==id);render();}
-function frostSetMarch(id,key,val){const m=FROST.members.find(m=>m.id===id);if(m)m[key]=val?parseInt(val):null;saveAll();render();}
-function frostTp(id){FROST.pet[id]?(FROST.pet[id]=false,delete FROST.petStart[id]):(FROST.pet[id]=true,FROST.petStart[id]=Date.now());render();}
-function frostCTeam(id,t){const m=FROST.members.find(m=>m.id===id);if(m)m.team=t;render();}
-function frostSetPetT(id,ts){const[h,mn]=ts.split(':').map(Number),now=new Date(),t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mn,0);if(t-now>43200000)t.setDate(t.getDate()-1);FROST.petStart[id]=t.getTime();render();}
-function frostSetPetN(id){FROST.petStart[id]=Date.now();render();}
-
-// 共通
-function addE(){
+function sRmv(id){SS.members=SS.members.filter(m=>m.id!==id);SS.active=SS.active.filter(a=>a!==id);for(const k of Object.keys(SS.cityAssign)){if(SS.cityAssign[k]===id)delete SS.cityAssign[k];}render();}
+function sToggleActive(mid){SS.active.includes(mid)?SS.active=SS.active.filter(a=>a!==mid):SS.active.push(mid);render();}
+function sAllJoin(){SS.active=[...new Set([...SS.active,...Object.values(SS.cityAssign)])];render();}
+function sAllLeave(){SS.active=[];render();}
+function sTp(id){SS.pet[id]?(SS.pet[id]=false,delete SS.petStart[id]):(SS.pet[id]=true,SS.petStart[id]=Date.now());render();}
+function sCTeam(id,t){const m=SS.members.find(m=>m.id===id);if(m)m.team=t;render();}
+function sSpetT(id,ts){const[h,mn]=ts.split(':').map(Number),now=new Date(),t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mn,0);if(t-now>43200000)t.setDate(t.getDate()-1);SS.petStart[id]=t.getTime();render();}
+function sSpetN(id){SS.petStart[id]=Date.now();render();}
+function sAddE(){
   const n=document.getElementById('en')?.value?.trim();if(!n){toast('敵名を入力してください');return;}
-  const march=parseInt(document.getElementById('em')?.value||'0');
+  const sel=document.getElementById('em');
+  const[idxStr,placement]=sel.value.split('_');const idx=parseInt(idxStr);
+  const ms=placement==='6'?M6:M5;const ps=placement==='6'?P6:P5;
+  const march=ms[idx],petMarch=ps[idx];
   const pet=document.getElementById('ep')?.checked||false;
-  if(MODE==='svs')SVS.enemies.push({name:n,march,pet});
-  else FROST.enemies.push({name:n,march,pet});
-  render();
+  SS.enemies.push({name:n,march,petMarch,pet});render();
 }
-function rmE(mode,i){if(mode==='svs')SVS.enemies.splice(i,1);else FROST.enemies.splice(i,1);render();}
+function sRmE(i){SS.enemies.splice(i,1);render();}
+
+// ============================================================
+// 霜竜 アクション
+// ============================================================
+function fAddM(){
+  const n=document.getElementById('fnn')?.value?.trim();
+  if(!n){toast('名前を入力してください');return;}
+  if(FS.members.length>=20){toast('最大20名まで登録できます');return;}
+  if(FS.members.find(m=>m.name===n)){toast('同じ名前が既に存在します');return;}
+  FS.members.push({id:Date.now(),name:n,team:'A',march:null,petMarch:null});
+  document.getElementById('fnn').value='';render();
+}
+function fRmv(id){FS.members=FS.members.filter(m=>m.id!==id);FS.active=FS.active.filter(a=>a!==id);delete FS.pet[id];render();}
+function fJoin(id){if(!FS.active.includes(id))FS.active.push(id);render();}
+function fLv(id){FS.active=FS.active.filter(a=>a!==id);render();}
+function fSetMarch(id,key,val){const m=FS.members.find(m=>m.id===id);if(m)m[key]=val?parseInt(val):null;saveAll();render();}
+function fTp(id){FS.pet[id]?(FS.pet[id]=false,delete FS.petStart[id]):(FS.pet[id]=true,FS.petStart[id]=Date.now());render();}
+function fCTeam(id,t){const m=FS.members.find(m=>m.id===id);if(m)m.team=t;render();}
+function fSpetT(id,ts){const[h,mn]=ts.split(':').map(Number),now=new Date(),t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mn,0);if(t-now>43200000)t.setDate(t.getDate()-1);FS.petStart[id]=t.getTime();render();}
+function fSpetN(id){FS.petStart[id]=Date.now();render();}
+function fAddE(){const n=document.getElementById('en')?.value?.trim();if(!n){toast('敵名を入力してください');return;}FS.enemies.push({name:n,march:parseInt(document.getElementById('em')?.value||'0'),pet:document.getElementById('ep')?.checked||false});render();}
+function fRmE(i){FS.enemies.splice(i,1);render();}
 
 // ============================================================
 // 保存・復元
 // ============================================================
 function saveAll(){
-  try{
-    localStorage.setItem('unified_svs',JSON.stringify({
-      split:SVS.split,faction:SVS.faction,placementA:SVS.placementA,placementB:SVS.placementB,
-      members:SVS.members,cityAssign:SVS.cityAssign,active:SVS.active,
-      pet:SVS.pet,petStart:SVS.petStart,enemies:SVS.enemies,
-    }));
-    localStorage.setItem('unified_frost',JSON.stringify({
-      members:FROST.members,active:FROST.active,
-      pet:FROST.pet,petStart:FROST.petStart,enemies:FROST.enemies,
-    }));
-  }catch(e){}
+  try{localStorage.setItem('app_svs',JSON.stringify({
+    split:SS.split,faction:SS.faction,placementA:SS.placementA,placementB:SS.placementB,
+    members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
+  }));
+  localStorage.setItem('app_frost',JSON.stringify({
+    members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies
+  }));}catch(e){}
 }
 function loadAll(){
   try{
-    const s=JSON.parse(localStorage.getItem('unified_svs')||'{}');
-    if(s.split)SVS.split=s.split;if(s.faction)SVS.faction=s.faction;
-    if(s.placementA)SVS.placementA=s.placementA;if(s.placementB)SVS.placementB=s.placementB;
-    if(s.members)SVS.members=s.members;if(s.cityAssign)SVS.cityAssign=s.cityAssign;
-    if(s.active)SVS.active=s.active;if(s.pet)SVS.pet=s.pet;
-    if(s.petStart)SVS.petStart=s.petStart;if(s.enemies)SVS.enemies=s.enemies;
+    const s=JSON.parse(localStorage.getItem('app_svs')||'{}');
+    if(s.split)SS.split=s.split;if(s.faction)SS.faction=s.faction;
+    if(s.placementA)SS.placementA=s.placementA;if(s.placementB)SS.placementB=s.placementB;
+    if(s.members)SS.members=s.members;if(s.cityAssign)SS.cityAssign=s.cityAssign;
+    if(s.active)SS.active=s.active;if(s.pet)SS.pet=s.pet;if(s.petStart)SS.petStart=s.petStart;
+    if(s.enemies)SS.enemies=s.enemies;if(s.adjust)SS.adjust=s.adjust;
   }catch(e){}
   try{
-    const f=JSON.parse(localStorage.getItem('unified_frost')||'{}');
-    if(f.members)FROST.members=f.members;if(f.active)FROST.active=f.active;
-    if(f.pet)FROST.pet=f.pet;if(f.petStart)FROST.petStart=f.petStart;
-    if(f.enemies)FROST.enemies=f.enemies;
+    const f=JSON.parse(localStorage.getItem('app_frost')||'{}');
+    if(f.members)FS.members=f.members;if(f.active)FS.active=f.active;
+    if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;
   }catch(e){}
 }
 
 // ============================================================
-// GAS連携（共通メンバーリスト）
+// GAS連携
 // ============================================================
 function fetchMembers(){
   fetch(GAS_URL).then(r=>r.json()).then(data=>{
     if(!data.members||!data.members.length)return;
-    // SVSメンバー更新
-    const oldSVS=SVS.members;
-    SVS.members=data.members.map((m,i)=>({
-      id:oldSVS.find(o=>o.name===m.name)?.id||(Date.now()+i),
-      name:m.name,
-      team:oldSVS.find(o=>o.name===m.name)?.team||(m.team||'A'),
-    }));
-    // FROSTメンバー更新
-    const oldFrost=FROST.members;
-    FROST.members=data.members.map((m,i)=>({
-      id:oldFrost.find(o=>o.name===m.name)?.id||(Date.now()+i+1000),
-      name:m.name,
-      team:oldFrost.find(o=>o.name===m.name)?.team||(m.team||'A'),
-      march:oldFrost.find(o=>o.name===m.name)?.march||null,
-      petMarch:oldFrost.find(o=>o.name===m.name)?.petMarch||null,
-    }));
-    document.getElementById('hdr-sub').textContent=MODE==='svs'?'WOS SVS 同時着弾管理':'霜竜 同時着弾管理';
+    // SVS・霜竜 両方に同じメンバーを反映
+    const syncMembers=(state,isFrost)=>{
+      const old=state.members;
+      state.members=data.members.map((m,i)=>{
+        const o=old.find(o=>o.name===m.name);
+        const base={id:o?.id||(Date.now()+i),name:m.name,team:o?.team||(m.team||'A')};
+        return isFrost?{...base,march:o?.march||null,petMarch:o?.petMarch||null}:base;
+      });
+    };
+    syncMembers(SS,false);syncMembers(FS,true);
     saveAll();render();
   }).catch(()=>{});
 }
@@ -917,89 +982,114 @@ function fetchMembers(){
 // ============================================================
 // パスワード認証 & モード切り替え
 // ============================================================
-function getPass(mode){return'1648';} // 両モード共通パスワード
-
+function getPass(){return'1648';}
 function checkAuth(mode){return sessionStorage.getItem(`auth_${mode}`)==='ok';}
 
-function showAuthScreen(mode){
-  document.getElementById('app').style.display='none';
-  const isSVS=mode==='svs';
-  const bgUrl=isSVS
-    ?FROST_REPO+'intro.jpg'
-    :FROST_REPO+'frost_intro.jpg';
-  const accentColor=isSVS?'#2f81f7':'#38b6ff';
-  const titleColor=isSVS?'#58a6ff':'#7dd3fc';
-  const glowColor=isSVS?'rgba(47,129,247,0.5)':'rgba(56,182,255,0.5)';
-  const titleText=isSVS?'突撃くん SVS版':'❄️ 突撃くん 霜竜版';
-  const btnText=isSVS?'⚔️ 突撃！':'❄️ 突撃！';
-  const switchText=isSVS?'❄️ 霜竜モードへ':'⚔️ SVSモードへ';
-  const switchBorder=isSVS?'#38b6ff':'#2f81f7';
-  const switchColor=isSVS?'#7dd3fc':'#58a6ff';
+function showModeSelect(){
+  // モード選択画面
+  const div=document.createElement('div');
+  div.id='mode-select';
+  div.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0d1117;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;';
+  div.innerHTML=`
+    <div style="font-size:26px;font-weight:800;color:#e6edf3;margin-bottom:20px;text-align:center">突撃くん</div>
+    <button onclick="showAuth('svs')"
+      style="width:100%;max-width:300px;height:70px;background:linear-gradient(135deg,#1f6feb,#2f81f7);border:none;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(47,129,247,0.4);">
+      ⚔️ SVS版
+    </button>
+    <button onclick="showAuth('frost')"
+      style="width:100%;max-width:300px;height:70px;background:linear-gradient(135deg,#0e4d7a,#0e8fd4);border:none;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(56,182,255,0.4);">
+      ❄️ 霜竜版
+    </button>
+  `;
+  document.body.appendChild(div);
+}
 
-  // 背景
+function showAuth(mode){
+  document.getElementById('mode-select')?.remove();
+  const isSvs=mode==='svs';
+  const bgUrl=isSvs?REPO_SVS+'intro.jpg':REPO_FROST+'frost_intro.jpg';
+  const accentColor=isSvs?'#2f81f7':'#38b6ff';
+  const titleText=isSvs?'⚔️ 突撃くん SVS版':'❄️ 突撃くん 霜竜版';
+  const otherLabel=isSvs?'❄️ 霜竜モードへ':'⚔️ SVSモードへ';
+  const switchFn=isSvs?'switchMode(\'frost\')':'switchMode(\'svs\')';
+
   const bg=document.createElement('div');
   bg.id='auth-bg';
-  bg.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10;overflow:hidden;background:#060d1a;';
+  bg.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10;overflow:hidden;background:#0d1117;';
   const bgImg=document.createElement('img');
   bgImg.src=bgUrl+'?v='+Date.now();
   bgImg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
-  bg.appendChild(bgImg);
-  document.body.appendChild(bg);
+  bg.appendChild(bgImg);document.body.appendChild(bg);
 
-  // 入力UI
   const div=document.createElement('div');
   div.id='auth-screen';
   div.style.cssText='position:fixed;top:52%;left:50%;transform:translate(-50%,-50%);z-index:11;width:82%;max-width:300px;display:flex;flex-direction:column;align-items:center;';
   div.innerHTML=`
-    <div style="font-size:24px;font-weight:800;color:${titleColor};margin-bottom:4px;text-shadow:0 0 20px ${glowColor},0 2px 8px rgba(0,0,0,1)">${titleText}</div>
-    <div style="font-size:13px;color:#e0eeff;margin-bottom:16px;text-shadow:0 0 10px rgba(0,0,0,1)">パスワードを入力してください</div>
+    <div style="font-size:22px;font-weight:800;color:${accentColor};margin-bottom:4px;text-shadow:0 0 16px rgba(0,0,0,1)">${titleText}</div>
+    <div style="font-size:13px;color:#e6edf3;margin-bottom:16px;text-shadow:0 0 10px rgba(0,0,0,1)">パスワードを入力してください</div>
     <input id="pw-input" type="password" placeholder="パスワード"
-      style="width:100%;height:50px;background:rgba(6,13,26,0.9);border:1.5px solid ${accentColor};border-radius:10px;color:#e0eeff;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;"
+      style="width:100%;height:50px;background:rgba(10,14,22,0.92);border:1.5px solid ${accentColor};border-radius:10px;color:#e6edf3;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;"
       onkeydown="if(event.key==='Enter')startVideo('${mode}')"/>
     <button onclick="startVideo('${mode}')"
-      style="width:100%;height:50px;background:${isSVS?'#1f6feb':'#0e8fd4'};border:none;border-radius:10px;color:#fff;font-size:17px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 0 15px ${glowColor};">
-      ${btnText}
+      style="width:100%;height:50px;background:${isSvs?'#1f6feb':'#0e8fd4'};border:none;border-radius:10px;color:#fff;font-size:17px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;margin-bottom:14px;">
+      突撃！
     </button>
-    <div id="pw-err" style="color:#f85149;font-size:13px;margin-top:10px;min-height:18px;text-shadow:0 0 8px rgba(0,0,0,1)"></div>
-    <button onclick="switchMode('${isSVS?'frost':'svs'}')"
-      style="width:100%;height:42px;background:rgba(6,13,26,0.75);border:1.5px solid ${switchBorder};border-radius:10px;color:${switchColor};font-size:14px;font-weight:600;cursor:pointer;margin-top:14px;-webkit-appearance:none;touch-action:manipulation;">
-      ${switchText}
+    <div id="pw-err" style="color:#f85149;font-size:13px;min-height:16px;text-shadow:0 0 8px rgba(0,0,0,1);margin-bottom:10px"></div>
+    <button onclick="${switchFn}"
+      style="width:100%;height:42px;background:rgba(10,14,22,0.75);border:1.5px solid ${isSvs?'#38b6ff':'#2f81f7'};border-radius:10px;color:${isSvs?'#7dd3fc':'#58a6ff'};font-size:14px;font-weight:600;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;">
+      ${otherLabel}
     </button>
   `;
   document.body.appendChild(div);
   setTimeout(()=>document.getElementById('pw-input')?.focus(),300);
+  // 現在のモードを記憶
+  window._authMode=mode;
+}
+
+function switchMode(toMode){
+  document.getElementById('auth-screen')?.remove();
+  document.getElementById('auth-bg')?.remove();
+  // 切り替えエフェクト動画
+  const videoUrl=toMode==='frost'
+    ?REPO_FROST+'switch_to_frost.mp4'
+    :REPO_FROST+'switch_to_svs.mp4';
+  const vwrap=document.createElement('div');
+  vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
+  const vid=document.createElement('video');
+  vid.src=videoUrl;
+  vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
+  vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
+  const goAuth=()=>{vwrap.style.transition='opacity 0.4s';vwrap.style.opacity='0';setTimeout(()=>{vwrap.remove();showAuth(toMode);},400);};
+  vid.onended=goAuth;vid.onerror=goAuth;
+  vwrap.appendChild(vid);document.body.appendChild(vwrap);
+  vid.play().catch(goAuth);
 }
 
 function startVideo(mode){
   const val=document.getElementById('pw-input')?.value?.trim();
-  if(val!==getPass(mode)){
-    const err=document.getElementById('pw-err');
-    if(err)err.textContent='パスワードが違います';
-    const inp=document.getElementById('pw-input');
-    if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor=mode==='svs'?'#2f81f7':'#38b6ff';},1000);inp.value='';inp.focus();}
+  if(val!==getPass()){
+    const err=document.getElementById('pw-err');if(err)err.textContent='パスワードが違います';
+    const inp=document.getElementById('pw-input');if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor=mode==='svs'?'#2f81f7':'#38b6ff';},1000);inp.value='';inp.focus();}
     return;
   }
   sessionStorage.setItem(`auth_${mode}`,'ok');
-  document.getElementById('auth-screen')?.remove();
-  document.getElementById('auth-bg')?.remove();
-
-  const introVideo=mode==='svs'?FROST_REPO+'intro.mp4':FROST_REPO+'frost_intro.mp4';
+  document.getElementById('auth-screen')?.remove();document.getElementById('auth-bg')?.remove();
+  const videoUrl=mode==='svs'?REPO_SVS+'intro.mp4':REPO_FROST+'frost_intro.mp4';
   const vwrap=document.createElement('div');
   vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
   const vid=document.createElement('video');
-  vid.src=introVideo;
+  vid.src=videoUrl;
   vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
   vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
   const goMain=()=>{
     vwrap.style.transition='opacity 0.5s';vwrap.style.opacity='0';
     setTimeout(()=>{
       vwrap.remove();
-      MODE=mode;
       document.getElementById('app').style.display='flex';
       document.getElementById('app').style.opacity='0';
       document.getElementById('app').style.transition='opacity 0.4s';
       setTimeout(()=>{document.getElementById('app').style.opacity='1';},30);
-      render();fetchMembers();
+      setMode(mode);fetchMembers();
     },500);
   };
   vid.onended=goMain;vid.onerror=goMain;
@@ -1007,47 +1097,31 @@ function startVideo(mode){
   vid.play().catch(goMain);
 }
 
-function switchMode(targetMode){
-  document.getElementById('auth-screen')?.remove();
-  document.getElementById('auth-bg')?.remove();
-  const switchVideo=targetMode==='frost'
-    ?FROST_REPO+'switch_to_frost.mp4'
-    :FROST_REPO+'switch_to_svs.mp4';
-  const vwrap=document.createElement('div');
-  vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
-  const vid=document.createElement('video');
-  vid.src=switchVideo;
-  vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
-  vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
-  const goAuth=()=>{
-    vwrap.style.transition='opacity 0.4s';vwrap.style.opacity='0';
-    setTimeout(()=>{vwrap.remove();showAuthScreen(targetMode);},400);
-  };
-  vid.onended=goAuth;vid.onerror=goAuth;
-  vwrap.appendChild(vid);document.body.appendChild(vwrap);
-  vid.play().catch(goAuth);
-}
+// ============================================================
+// 初期化
+// ============================================================
+const _r=render;
+window.render=function(){_r();saveAll();};
 
-// ============================================================
-// 起動
-// ============================================================
 setInterval(()=>{
-  SVS.now=Date.now();FROST.now=Date.now();
-  const state=MODE==='svs'?SVS:FROST;
-  if(state.members.some(m=>state.active.includes(m.id)&&state.pet[m.id]))render();
+  SS.now=Date.now();FS.now=Date.now();
+  if(SS.members.some(m=>SS.active.includes(m.id)&&SS.pet[m.id])||FS.members.some(m=>FS.active.includes(m.id)&&FS.pet[m.id]))render();
 },10000);
 
 loadAll();
 
-// 最後にアクセスしたモードから起動
-const lastMode=localStorage.getItem('last_mode')||'svs';
-if(checkAuth(lastMode)){
-  MODE=lastMode;
+// 前回のセッションがあればそのモードで再開、なければモード選択画面
+const lastMode=sessionStorage.getItem('last_mode');
+if(lastMode&&checkAuth(lastMode)){
   document.getElementById('app').style.display='flex';
-  render();fetchMembers();
+  setMode(lastMode);fetchMembers();
 } else {
-  showAuthScreen(lastMode);
+  showModeSelect();
 }
+
+// モード設定時にセッションに記録
+const _setMode=setMode;
+window.setMode=function(m){sessionStorage.setItem('last_mode',m);_setMode(m);};
 </script>
 </body>
 </html>
