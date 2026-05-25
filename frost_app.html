@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>突撃くん 霜竜版</title>
+<style>
+:root{
+  --bg:#060d1a;--bg2:#0d1829;--bg3:#142035;--bg4:#1c2e47;
+  --border:#1c3050;--border2:#2a4570;
+  --text:#e0eeff;--text2:#7a9cc0;--text3:#4a6a90;
+  --accent:#38b6ff;--accent2:#0e8fd4;
+  --green:#3fb950;--red:#f85149;--orange:#e3b341;--purple:#a371f7;
+  --ice:#7dd3fc;--ice2:#38b6ff;
+  --btn-h:48px;--radius:8px;--radius-lg:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Hiragino Kana','Hiragino Sans','Yu Gothic',sans-serif;font-size:14px;overscroll-behavior:none}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 12px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:15px;font-weight:700;color:var(--ice)}
+.tab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:55px;padding:10px 4px;text-align:center;font-size:11px;color:var(--text2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tab.active{color:var(--ice);border-bottom-color:var(--ice)}
+.content{flex:1;padding:12px;overflow-y:auto}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;margin-bottom:10px}
+.sec{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.btn{height:var(--btn-h);border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:500;width:100%}
+.btn:active{filter:brightness(0.82)}
+.btn-primary{background:var(--accent2);border-color:var(--accent);color:#fff}
+.btn-success{background:#0a2a1f;border-color:var(--green);color:var(--green)}
+.btn-danger{background:#2a0a0a;border-color:var(--red);color:var(--red)}
+.btn-ice{background:#0a1e2e;border-color:var(--ice);color:var(--ice)}
+.btn-sm{height:36px;font-size:13px}
+.btn-xs{height:30px;font-size:12px;padding:0 10px}
+.inp{width:100%;height:40px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:14px;padding:0 10px;outline:none}
+.inp:focus{border-color:var(--ice)}
+.inp-num{width:70px;height:36px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:15px;font-weight:700;text-align:center;padding:0 6px;outline:none;-webkit-appearance:none;}
+.inp-num:focus{border-color:var(--ice)}
+select.inp{cursor:pointer}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.p-off{background:#1a2030;color:var(--text2)}
+.p-on{background:#0a2a1f;color:var(--green)}
+.p-warn{background:#2a1a0a;color:var(--orange)}
+.p-low{background:#2a0a0a;color:var(--red)}
+.p-dead{background:#1a2030;color:var(--text3)}
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--bg4);color:var(--text2)}
+.chip[data-t="A"]{background:#0a1a2a;color:#58a6ff}
+.chip[data-t="B"]{background:#0a2a1a;color:var(--green)}
+.chip[data-t="C"]{background:#2a1a0a;color:var(--orange)}
+.chip[data-t="D"]{background:#2a0a0a;color:var(--red)}
+.chip[data-t="E"]{background:#1a0a2a;color:var(--purple)}
+.empty{text-align:center;padding:24px;color:var(--text3);font-size:13px}
+.cpbox{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;font-family:monospace;font-size:13px;white-space:pre;overflow-x:auto;color:var(--text);margin-bottom:8px;line-height:1.8}
+.tgl{position:relative;width:48px;height:26px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tsl{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg4);border-radius:26px;transition:.2s}
+.tsl:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:var(--text2);border-radius:50%;transition:.2s}
+input:checked+.tsl{background:var(--green)}
+input:checked+.tsl:before{transform:translateX(22px);background:#fff}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#238636;color:#fff;padding:10px 22px;border-radius:20px;font-size:14px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.mov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.78);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--bg2);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:16px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;border-top:1px solid var(--border2)}
+.row{display:flex;align-items:center;gap:8px}.fl1{flex:1}
+.bsec{background:var(--bg3);border-radius:var(--radius);padding:8px 10px;border-left:3px solid var(--purple);margin-bottom:8px}
+.er{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ptp{background:var(--bg3);border-radius:var(--radius);padding:10px;margin-top:8px;border:1px solid var(--border2)}
+.tinp{width:84px;height:36px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:15px;font-weight:700;text-align:center;padding:0 6px;outline:none}
+.tinp:focus{border-color:var(--ice)}
+/* 氷エフェクト装飾 */
+.ice-border{border-color:var(--ice) !important;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div>
+      <div class="header-title">❄️ 突撃くん 霜竜版</div>
+      <div style="font-size:11px;color:var(--text3)" id="hdr-sub">霜竜 同時着弾管理</div>
+    </div>
+    <div style="font-size:11px;text-align:right;color:var(--text2)" id="hdr-info"></div>
+  </div>
+  <div class="tab-bar" id="tabs">
+    <div class="tab active" data-tab="battle">② 当日参戦</div>
+    <div class="tab" data-tab="calc">同着計算</div>
+    <div class="tab" data-tab="copy">コピー</div>
+    <div class="tab" data-tab="enemy">敵情報</div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const REPO='https://kekj12kek-sudo.github.io/frost-dragon-app/';
+const GAS_URL='https://script.google.com/macros/s/AKfycbyES7vlaVErWjcK7WAmcM4cHg1s6EL1kQIxsuELXLmf8GbGNLGfnel_Mp-Qg33BKDb8iQ/exec';
+const TEAMS=['A','B','C','D','E'];
+
+// ============================================================
+// STATE
+// members: {id, name, team, march, petMarch}
+// march: 通常行軍時間（手入力）
+// petMarch: ペット使用時行軍時間（手入力）
+// ============================================================
+const S={
+  tab:'battle',
+  members:[],
+  active:[],
+  pet:{}, petStart:{},
+  enemies:[],
+  modal:null, now:Date.now(),
+};
+
+function getEffectiveMarch(mid){
+  const m=S.members.find(m=>m.id===mid);
+  if(!m)return null;
+  if(S.pet[mid]&&petSt(mid)!=='dead'&&m.petMarch) return m.petMarch;
+  return m.march||null;
+}
+function petSt(id){
+  if(!S.pet[id])return'off';
+  const rem=120-(S.now-(S.petStart[id]||S.now))/60000;
+  if(rem<=0)return'dead';if(rem<=10)return'low';if(rem<=30)return'warn';return'on';
+}
+function petLbl(id){
+  if(!S.pet[id])return'⚪ 未使用';
+  const rem=120-(S.now-(S.petStart[id]||S.now))/60000;
+  if(rem<=0)return'⚫ 失効';
+  const m=Math.floor(rem),s=Math.floor((rem-m)*60);
+  return`${{on:'🟢',warn:'🟡',low:'🔴'}[petSt(id)]||'⚪'} ${m}:${String(s).padStart(2,'0')}`;
+}
+function calcHits(mems){
+  const wm=mems.map(m=>({...m,march:getEffectiveMarch(m.id)})).filter(m=>m.march!==null&&m.march>0);
+  if(!wm.length)return[];
+  const base=Math.min(...wm.map(m=>m.march));
+  return wm.map(m=>({...m,wait:m.march-base})).sort((a,b)=>b.wait-a.wait);
+}
+function tc(t){return{A:'#58a6ff',B:'#3fb950',C:'#e3b341',D:'#f85149',E:'#a371f7'}[t]||'#38b6ff';}
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200);}
+function cp(txt){navigator.clipboard.writeText(txt).then(()=>toast('コピーしました！')).catch(()=>toast('コピー失敗'));}
+function fmtT(id){const t=new Date(S.petStart[id]||Date.now());return`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;}
+function fmtE(id){const e=new Date((S.petStart[id]||Date.now())+7200000);return`${String(e.getHours()).padStart(2,'0')}:${String(e.getMinutes()).padStart(2,'0')}`;}
+
+function render(){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===S.tab));
+  const ac=S.members.filter(m=>S.active.includes(m.id));
+  document.getElementById('hdr-info').textContent=`参戦: ${ac.length}名`;
+  ({battle:rBattle,calc:rC,copy:rCp,enemy:rE})[S.tab]?.(document.getElementById('content'));
+}
+
+// ==================== 当日参戦 ====================
+function rBattle(el){
+  const waiting=S.members.filter(m=>!S.active.includes(m.id));
+  const active=S.members.filter(m=>S.active.includes(m.id));
+
+  el.innerHTML=`
+<div class="card">
+  <div class="sec">集結主登録 (${S.members.length}/20名)</div>
+  <div class="row" style="margin-bottom:8px">
+    <input class="inp fl1" id="nn" placeholder="名前を入力"/>
+    <button class="btn btn-sm btn-ice" style="width:80px;flex-shrink:0" onclick="addM()">追加</button>
+  </div>
+  <div style="font-size:11px;color:var(--text3)">💡 行軍時間は参戦後に入力できます</div>
+</div>
+
+<div class="card">
+  <div class="sec">待機中 (${waiting.length}名)</div>
+  ${waiting.length?waiting.map(m=>`
+  <div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+    <div style="flex:1;font-size:14px;font-weight:600">${m.name}</div>
+    <button class="btn btn-sm btn-success" style="width:80px;flex-shrink:0" onclick="join(${m.id})">参戦</button>
+    <button class="btn btn-sm btn-danger" style="width:34px;flex-shrink:0;padding:0;margin-left:6px" onclick="rmv(${m.id})">✕</button>
+  </div>`).join(''):'<div class="empty">待機中なし</div>'}
+</div>
+
+<div class="card">
+  <div class="sec">参戦中 (${active.length}名)</div>
+  ${active.length?active.map(m=>{
+    const st=petSt(m.id);
+    const pc={off:'p-off',on:'p-on',warn:'p-warn',low:'p-low',dead:'p-dead'}[st];
+    const eff=getEffectiveMarch(m.id);
+    const hasPet=S.pet[m.id]&&st!=='dead';
+    return`<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <!-- 名前・チーム・行軍・離脱 -->
+      <div class="row" style="margin-bottom:8px">
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700">${m.name}</div>
+          ${eff?`<div style="font-size:11px;color:${hasPet?'var(--green)':'var(--ice)'}">有効行軍: ${eff}秒${hasPet?' 🟢':''}</div>`:'<div style="font-size:11px;color:var(--text3)">行軍時間未入力</div>'}
+        </div>
+        <div class="chip" data-t="${m.team}">${m.team}</div>
+        <button class="btn btn-xs btn-danger" style="width:36px;padding:0;flex-shrink:0" onclick="lv(${m.id})">離脱</button>
+      </div>
+      <!-- 行軍時間入力 -->
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+        <div style="font-size:11px;color:var(--text2);width:56px;flex-shrink:0">通常</div>
+        <input class="inp-num" type="number" placeholder="秒" value="${m.march||''}"
+          onchange="setMarch(${m.id},'march',this.value)" style="width:80px"/>
+        <div style="font-size:11px;color:var(--green);width:56px;flex-shrink:0">🐾ペット</div>
+        <input class="inp-num" type="number" placeholder="秒" value="${m.petMarch||''}"
+          onchange="setMarch(${m.id},'petMarch',this.value)" style="width:80px"/>
+        <div style="font-size:11px;color:var(--text3)">秒</div>
+      </div>
+      <!-- ペット・チーム -->
+      <div class="row" style="margin-bottom:${S.pet[m.id]?'6':'0'}px">
+        <span class="tag ${pc}">${petLbl(m.id)}</span>
+        <button class="btn btn-xs" style="width:74px" onclick="tp(${m.id})">${S.pet[m.id]?'停止':'ペットON'}</button>
+        <select class="inp" style="height:30px;font-size:12px;flex:1" onchange="cTeam(${m.id},this.value)">
+          ${TEAMS.map(t=>`<option value="${t}" ${m.team===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      ${S.pet[m.id]?`
+      <div class="ptp">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
+        <div class="row" style="margin-bottom:4px">
+          <input class="tinp" type="time" value="${fmtT(m.id)}" onchange="sPetT(${m.id},this.value)"/>
+          <button class="btn btn-xs" style="width:64px" onclick="sPetN(${m.id})">今すぐ</button>
+          <span style="font-size:11px;color:var(--text2)">から2時間</span>
+        </div>
+        <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(m.id)}</div>
+      </div>`:''}
+    </div>`;
+  }).join(''):'<div class="empty">参戦中なし</div>'}
+</div>`;
+}
+
+// ==================== 同着計算 ====================
+function rC(el){
+  const ac=S.members.filter(m=>S.active.includes(m.id));
+  const all=calcHits(ac);
+  const teams=[...new Set(ac.map(m=>m.team))].sort();
+  el.innerHTML=`
+<div class="card">
+  <div class="sec">全体同時着弾</div>
+  ${all.length?`
+  <div style="background:var(--bg3);border-radius:var(--radius);padding:12px;margin-bottom:10px">
+    <div style="font-size:11px;color:var(--text3)">基準（最短行軍）</div>
+    <div style="font-size:40px;font-weight:700;color:var(--ice);line-height:1">${Math.min(...all.map(r=>r.march))}<span style="font-size:16px">秒</span></div>
+    <div style="font-size:11px;color:var(--text2);margin-top:2px">参戦${ac.length}名</div>
+  </div>
+  ${all.map(r=>{
+    const hasPet=S.pet[r.id]&&petSt(r.id)!=='dead';
+    return`<div style="display:flex;align-items:center;padding:10px;background:var(--bg3);border-radius:var(--radius);margin-bottom:6px;border-left:4px solid ${r.wait===0?'var(--green)':'var(--ice)'}">
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${r.name}</div>
+        <div style="font-size:11px;color:var(--text3)">${r.march}秒${hasPet?' 🟢':''}</div>
+      </div>
+      <div class="chip" data-t="${r.team}" style="margin-right:10px">${r.team}</div>
+      <div style="text-align:right">
+        <div style="font-size:38px;font-weight:700;line-height:1;color:${r.wait===0?'var(--green)':'var(--text)'}">${r.wait}</div>
+        <div style="font-size:11px;color:var(--text3)">秒後</div>
+      </div>
+    </div>`;
+  }).join('')}`:`<div class="empty">参戦中メンバーの行軍時間を入力してください</div>`}
+</div>
+${all.length&&teams.length>1?`<div class="card">
+  <div class="sec">チーム別同時着弾</div>
+  ${teams.map(t=>{
+    const tr=calcHits(ac.filter(m=>m.team===t));if(!tr.length)return'';
+    return`<div class="bsec" style="border-left-color:${tc(t)};margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:${tc(t)};margin-bottom:6px">チーム ${t} — 基準: ${Math.min(...tr.map(r=>r.march))}秒</div>
+      ${tr.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:13px;font-weight:600">${r.name}</div>
+        <div style="font-size:11px;color:var(--text2);margin-right:10px">${r.march}秒</div>
+        <div style="font-size:26px;font-weight:700;color:${r.wait===0?'var(--green)':'var(--text)'}">${r.wait}<span style="font-size:11px;color:var(--text3)">秒後</span></div>
+      </div>`).join('')}
+    </div>`;
+  }).join('')}
+</div>`:''}`;
+}
+
+// ==================== コピー ====================
+function rCp(el){
+  const ac=S.members.filter(m=>S.active.includes(m.id));
+  const all=calcHits(ac);
+  const teams=[...new Set(ac.map(m=>m.team))].sort();
+  const at=all.map(r=>`${r.name} ${r.wait}`).join('\n');
+
+  // 2チームずつ分割
+  const chunks=[];
+  for(let i=0;i<teams.length;i+=2) chunks.push(teams.slice(i,i+2));
+
+  function makeTeamText(tList){
+    return tList.map(t=>{
+      const tr=calcHits(ac.filter(m=>m.team===t));
+      if(!tr.length)return null;
+      return tr.map((r,i)=>i===0?`【${t}】${r.name} ${r.wait}`:`${r.name} ${r.wait}`).join('\n');
+    }).filter(Boolean).join('\n');
+  }
+
+  el.innerHTML=`
+<div class="card"><div class="sec">全員版</div>
+  <div class="cpbox" id="cp-all">${at||'(参戦メンバーの行軍時間を入力後に表示)'}</div>
+  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-all').textContent)">コピー</button>
+</div>
+${chunks.length?chunks.map((chunk,i)=>`
+<div class="card" style="margin-top:10px">
+  <div class="sec">チーム ${chunk.join('・')}（${i+1}回目）</div>
+  <div class="cpbox" id="cp-chunk-${i}">${makeTeamText(chunk)||'(なし)'}</div>
+  <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-chunk-${i}').textContent)">コピー（${i+1}回目）</button>
+</div>`).join(''):''}
+<div class="card" style="margin-top:10px"><div class="sec">Discord送信</div>
+  <div id="wh-list"></div>
+  <div style="background:var(--bg3);border-radius:var(--radius);padding:10px;margin-bottom:8px">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">チャンネルを追加</div>
+    <div class="row" style="margin-bottom:6px">
+      <input class="inp fl1" id="wh-name" placeholder="チャンネル名" style="height:36px;font-size:13px;"/>
+    </div>
+    <div class="row">
+      <input class="inp fl1" id="wh-url" placeholder="Webhook URL" style="height:36px;font-size:13px;"/>
+      <button class="btn btn-xs btn-success" style="width:60px;flex-shrink:0" onclick="addWh()">追加</button>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="sendD()">Discordへ送信</button>
+</div>`;
+  renderWhList();
+}
+
+// ==================== 敵情報 ====================
+function rE(el){
+  el.innerHTML=`
+<div class="card"><div class="sec">敵情報入力</div>
+  <div class="row" style="margin-bottom:8px"><input class="inp fl1" id="en" placeholder="敵集結主名"/></div>
+  <div class="row" style="margin-bottom:8px">
+    <span style="font-size:12px;color:var(--text2);width:40px">行軍</span>
+    <input class="inp-num" id="em" type="number" placeholder="秒" style="width:80px"/>
+    <label class="tgl" style="margin-left:8px"><input type="checkbox" id="ep"/><span class="tsl"></span></label>
+    <span style="font-size:12px;color:var(--text2)">ペット</span>
+  </div>
+  <button class="btn btn-primary btn-sm" onclick="addE()">追加</button>
+</div>
+<div class="card" style="margin-top:10px"><div class="sec">敵一覧 (${S.enemies.length}件)</div>
+  ${S.enemies.length?S.enemies.map((e,i)=>`
+  <div class="er">
+    <div style="flex:1;font-size:14px;font-weight:600">${e.name}</div>
+    <div style="font-size:14px;font-weight:700;color:var(--red);min-width:42px">${e.march}秒</div>
+    <span class="tag ${e.pet?'p-on':'p-off'}">${e.pet?'🟢ペットON':'⚪OFF'}</span>
+    <button class="btn btn-xs btn-danger" style="width:30px;padding:0" onclick="rmE(${i})">✕</button>
+  </div>`).join(''):'<div class="empty">敵情報なし</div>'}
+</div>`;
+}
+
+// ==================== Webhook ====================
+let webhooks=JSON.parse(localStorage.getItem('frost_webhooks')||'[]');
+let selectedWh=0;
+function saveWh(){localStorage.setItem('frost_webhooks',JSON.stringify(webhooks));}
+function addWh(){
+  const name=document.getElementById('wh-name')?.value?.trim();
+  const url=document.getElementById('wh-url')?.value?.trim();
+  if(!name||!url){toast('チャンネル名とURLを入力してください');return;}
+  webhooks.push({name,url});saveWh();
+  document.getElementById('wh-name').value='';
+  document.getElementById('wh-url').value='';
+  renderWhList();
+}
+function removeWh(i){webhooks.splice(i,1);if(selectedWh>=webhooks.length)selectedWh=0;saveWh();renderWhList();}
+function renderWhList(){
+  const el=document.getElementById('wh-list');if(!el)return;
+  if(!webhooks.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);margin-bottom:8px">↓ チャンネルを登録してください</div>';return;}
+  el.innerHTML=`<div class="row" style="margin-bottom:8px">
+    <select class="inp fl1" id="wh-select" onchange="selectedWh=this.selectedIndex" style="height:44px;font-size:14px;font-weight:600;">
+      ${webhooks.map((w,i)=>`<option value="${i}" ${selectedWh===i?'selected':''}>${w.name}</option>`).join('')}
+    </select>
+    <button class="btn btn-xs btn-danger" style="width:36px;padding:0;flex-shrink:0" onclick="removeWh(selectedWh)">✕</button>
+  </div>`;
+}
+function sendD(){
+  if(!webhooks.length){toast('チャンネルを登録してください');return;}
+  const url=webhooks[selectedWh]?.url;if(!url)return;
+  const ac=S.members.filter(m=>S.active.includes(m.id));
+  const teams=[...new Set(ac.map(m=>m.team))].sort();
+  const txt=teams.map(t=>{
+    const tr=calcHits(ac.filter(m=>m.team===t));if(!tr.length)return null;
+    return tr.map((r,i)=>i===0?`**【${t}】**${r.name} ${r.wait}秒後`:`${r.name} ${r.wait}秒後`).join('\n');
+  }).filter(Boolean).join('\n');
+  fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({content:`**❄️ 霜竜同時着弾**\n\n${txt}`})})
+    .then(r=>toast(r.ok?'Discord送信完了！':'送信失敗')).catch(()=>toast('送信エラー'));
+}
+
+// ==================== ACTIONS ====================
+function addM(){
+  const n=document.getElementById('nn')?.value?.trim();
+  if(!n){toast('名前を入力してください');return;}
+  if(S.members.length>=20){toast('最大20名まで登録できます');return;}
+  if(S.members.find(m=>m.name===n)){toast('同じ名前が既に存在します');return;}
+  S.members.push({id:Date.now(),name:n,team:'A',march:null,petMarch:null});
+  document.getElementById('nn').value='';render();
+}
+function rmv(id){S.members=S.members.filter(m=>m.id!==id);S.active=S.active.filter(a=>a!==id);delete S.pet[id];render();}
+function join(id){if(!S.active.includes(id))S.active.push(id);render();}
+function lv(id){S.active=S.active.filter(a=>a!==id);render();}
+function setMarch(id,key,val){
+  const m=S.members.find(m=>m.id===id);
+  if(m)m[key]=val?parseInt(val):null;
+  saveAll();render();
+}
+function tp(id){S.pet[id]?(S.pet[id]=false,delete S.petStart[id]):(S.pet[id]=true,S.petStart[id]=Date.now());render();}
+function cTeam(id,t){const m=S.members.find(m=>m.id===id);if(m)m.team=t;render();}
+function sPetT(id,ts){
+  const[h,mn]=ts.split(':').map(Number),now=new Date(),t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mn,0);
+  if(t-now>43200000)t.setDate(t.getDate()-1);S.petStart[id]=t.getTime();render();
+}
+function sPetN(id){S.petStart[id]=Date.now();render();}
+function addE(){
+  const n=document.getElementById('en')?.value?.trim();if(!n){toast('敵名を入力してください');return;}
+  S.enemies.push({name:n,march:parseInt(document.getElementById('em')?.value||'0'),pet:document.getElementById('ep')?.checked||false});render();
+}
+function rmE(i){S.enemies.splice(i,1);render();}
+
+// ==================== 保存・復元 ====================
+function saveAll(){
+  try{localStorage.setItem('frost1',JSON.stringify({
+    members:S.members,active:S.active,pet:S.pet,petStart:S.petStart,enemies:S.enemies
+  }));}catch(e){}
+}
+function loadAll(){
+  try{
+    const d=JSON.parse(localStorage.getItem('frost1')||'{}');
+    if(d.members)S.members=d.members;
+    if(d.active)S.active=d.active;
+    if(d.pet)S.pet=d.pet;
+    if(d.petStart)S.petStart=d.petStart;
+    if(d.enemies)S.enemies=d.enemies;
+  }catch(e){}
+}
+
+// ==================== GAS連携 ====================
+function fetchMembers(){
+  const sub=document.getElementById('hdr-sub');
+  if(sub)sub.textContent='メンバー読込中...';
+  fetch(GAS_URL)
+    .then(r=>r.json())
+    .then(data=>{
+      if(!data.members||!data.members.length)return;
+      const old=S.members;
+      S.members=data.members.map((m,i)=>({
+        id:old.find(o=>o.name===m.name)?.id||(Date.now()+i),
+        name:m.name,
+        team:old.find(o=>o.name===m.name)?.team||(m.team||'A'),
+        march:old.find(o=>o.name===m.name)?.march||null,
+        petMarch:old.find(o=>o.name===m.name)?.petMarch||null,
+      }));
+      if(sub)sub.textContent='霜竜 同時着弾管理';
+      saveAll();render();
+    })
+    .catch(()=>{if(sub)sub.textContent='霜竜 同時着弾管理';});
+}
+
+// ==================== パスワード認証 ====================
+function getPass(){return'1648';}
+function checkAuth(){return sessionStorage.getItem('frost_auth')==='ok';}
+
+function showAuthScreen(){
+  document.getElementById('app').style.display='none';
+  const bg=document.createElement('div');
+  bg.id='auth-bg';
+  bg.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10;overflow:hidden;background:#060d1a;';
+  const bgImg=document.createElement('img');
+  bgImg.src=REPO+'frost_intro.jpg?v='+Date.now();
+  bgImg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
+  bg.appendChild(bgImg);
+  document.body.appendChild(bg);
+
+  const div=document.createElement('div');
+  div.id='auth-screen';
+  div.style.cssText='position:fixed;top:52%;left:50%;transform:translate(-50%,-50%);z-index:11;width:82%;max-width:300px;display:flex;flex-direction:column;align-items:center;';
+  div.innerHTML=`
+    <div style="font-size:24px;font-weight:800;color:#7dd3fc;margin-bottom:4px;text-shadow:0 0 20px rgba(56,182,255,0.8),0 2px 8px rgba(0,0,0,1)">❄️ 突撃くん 霜竜版</div>
+    <div style="font-size:13px;color:#e0eeff;margin-bottom:16px;text-shadow:0 0 10px rgba(0,0,0,1)">パスワードを入力してください</div>
+    <input id="pw-input" type="password" placeholder="パスワード"
+      style="width:100%;height:50px;background:rgba(6,13,26,0.9);border:1.5px solid #38b6ff;border-radius:10px;color:#e0eeff;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;"
+      onkeydown="if(event.key==='Enter')startVideo()"/>
+    <button onclick="startVideo()"
+      style="width:100%;height:50px;background:#0e8fd4;border:none;border-radius:10px;color:#fff;font-size:17px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 0 15px rgba(56,182,255,0.5);">
+      ❄️ 突撃！
+    </button>
+    <div id="pw-err" style="color:#f85149;font-size:13px;margin-top:10px;min-height:18px;text-shadow:0 0 8px rgba(0,0,0,1)"></div>
+  `;
+  document.body.appendChild(div);
+  setTimeout(()=>document.getElementById('pw-input')?.focus(),300);
+}
+
+function startVideo(){
+  const val=document.getElementById('pw-input')?.value?.trim();
+  if(val!==getPass()){
+    const err=document.getElementById('pw-err');
+    if(err)err.textContent='パスワードが違います';
+    const inp=document.getElementById('pw-input');
+    if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor='#38b6ff';},1000);inp.value='';inp.focus();}
+    return;
+  }
+  sessionStorage.setItem('frost_auth','ok');
+  document.getElementById('auth-screen')?.remove();
+  document.getElementById('auth-bg')?.remove();
+  const vwrap=document.createElement('div');
+  vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
+  const vid=document.createElement('video');
+  vid.src=REPO+'frost_intro.mp4';
+  vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
+  vid.playsInline=true;
+  vid.setAttribute('playsinline','');
+  vid.setAttribute('webkit-playsinline','');
+  vid.muted=false;
+  const goMain=()=>{
+    vwrap.style.transition='opacity 0.5s';vwrap.style.opacity='0';
+    setTimeout(()=>{
+      vwrap.remove();
+      document.getElementById('app').style.display='flex';
+      document.getElementById('app').style.opacity='0';
+      document.getElementById('app').style.transition='opacity 0.4s';
+      setTimeout(()=>{document.getElementById('app').style.opacity='1';},30);
+      render();fetchMembers();
+    },500);
+  };
+  vid.onended=goMain;vid.onerror=goMain;
+  vwrap.appendChild(vid);document.body.appendChild(vwrap);
+  vid.play().catch(goMain);
+}
+
+document.getElementById('tabs').addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab]');if(t){S.tab=t.dataset.tab;render();}
+});
+const _r=render;window.render=function(){_r();saveAll();};
+setInterval(()=>{S.now=Date.now();if(S.members.some(m=>S.active.includes(m.id)&&S.pet[m.id]))render();},10000);
+
+loadAll();
+if(checkAuth()){render();fetchMembers();}
+else showAuthScreen();
+</script>
+</body>
+</html>
