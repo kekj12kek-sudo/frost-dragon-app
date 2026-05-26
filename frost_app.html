@@ -12,7 +12,7 @@ body.mode-svs{background:#0d1117}
 body.mode-frost{background:#060d1a}
 
 /* SVS カラー */
-.svs-mode{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;--border:#30363d;--border2:#484f58;--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--accent:#2f81f7;--accent2:#1f6feb;--green:#3fb950;--red:#f85149;--orange:#e3b341;--purple:#a371f7;--hi:#58a6ff;}
+.svs-mode{--bg:#120a05;--bg2:#1b1008;--bg3:#26170c;--bg4:#332011;--border:#3f2814;--border2:#6b421d;--text:#fff3e6;--text2:#c9a47c;--text3:#8f6a43;--accent:#ff8a00;--accent2:#d96b00;--green:#3fb950;--red:#f85149;--orange:#ffb347;--purple:#a371f7;--hi:#ffb347;}
 /* 霜竜 カラー */
 .frost-mode{--bg:#060d1a;--bg2:#0d1829;--bg3:#142035;--bg4:#1c2e47;--border:#1c3050;--border2:#2a4570;--text:#e0eeff;--text2:#7a9cc0;--text3:#4a6a90;--accent:#38b6ff;--accent2:#0e8fd4;--green:#3fb950;--red:#f85149;--orange:#e3b341;--purple:#a371f7;--hi:#7dd3fc;}
 
@@ -989,88 +989,134 @@ function fetchMembers(){
 function getPass(){return'1648';}
 function checkAuth(mode){return sessionStorage.getItem(`auth_${mode}`)==='ok';}
 
+const MODE_THEME={
+  svs:{
+    key:'svs',
+    icon:'⚔️',
+    short:'SVS',
+    label:'SVS版',
+    title:'⚔️ 突撃くん SVS版',
+    accent:'#ff8a00',
+    accent2:'#d96b00',
+    accentSoft:'#ffb347',
+    border:'#ff9f1c',
+    glow:'rgba(255,138,0,0.58)',
+    bg:'rgba(42,20,4,0.82)',
+    bg2:'rgba(217,107,0,0.92)',
+    switchVideo:REPO_FROST+'switch_to_svs.mp4',
+    authBg:REPO_FROST+'svs_bg.mp4',
+    intro:REPO_FROST+'intro.mp4'
+  },
+  frost:{
+    key:'frost',
+    icon:'❄️',
+    short:'霜竜',
+    label:'霜竜版',
+    title:'❄️ 突撃くん 霜竜版',
+    accent:'#38b6ff',
+    accent2:'#0e8fd4',
+    accentSoft:'#7dd3fc',
+    border:'#38b6ff',
+    glow:'rgba(56,182,255,0.58)',
+    bg:'rgba(6,24,46,0.82)',
+    bg2:'rgba(14,143,212,0.92)',
+    switchVideo:REPO_FROST+'switch_to_frost.mp4',
+    authBg:REPO_FROST+'frost_bg.mp4',
+    intro:REPO_FROST+'frost_intro.mp4'
+  }
+};
+
+function cleanupEntranceScreens(){
+  ['mode-select','mode-bg-vid','mode-overlay','auth-screen','auth-bg','auth-bg-vid'].forEach(id=>document.getElementById(id)?.remove());
+  document.querySelectorAll('.entrance-layer').forEach(el=>el.remove());
+  document.querySelectorAll('video').forEach(v=>{if(v.id==='mode-bg-vid'||v.id==='auth-bg-vid'){v.pause();v.remove();}});
+}
+
 function showModeSelect(){
-  // mode_select.mp4をループ再生
+  cleanupEntranceScreens();
+
   const vid=document.createElement('video');
   vid.id='mode-bg-vid';
+  vid.className='entrance-layer';
   vid.src=REPO_FROST+'mode_select.mp4';
-  vid.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:28;';
+  vid.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:28;background:#000;';
   vid.autoplay=true;vid.loop=true;vid.muted=true;vid.playsInline=true;
   vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');
   document.body.appendChild(vid);
   vid.play().catch(()=>{});
-  // 暗幕
+
   const ov=document.createElement('div');
   ov.id='mode-overlay';
-  ov.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);z-index:29;';
+  ov.className='entrance-layer';
+  ov.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;background:linear-gradient(180deg,rgba(0,0,0,.38),rgba(0,0,0,.68));z-index:29;';
   document.body.appendChild(ov);
-  // UI
+
   const div=document.createElement('div');
   div.id='mode-select';
-  div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:20px;width:85%;max-width:300px;';
+  div.className='entrance-layer';
+  div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;width:min(92vw,460px);display:flex;flex-direction:column;align-items:center;gap:18px;padding:20px 16px;';
   div.innerHTML=`
-    <div style="font-size:28px;font-weight:800;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,1);text-align:center">突撃くん</div>
-    <button onclick="showAuth('svs')"
-      style="width:100%;height:64px;background:rgba(31,111,235,0.85);border:2px solid #2f81f7;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 4px 20px rgba(47,129,247,0.5);">
-      ⚔️ SVS版
-    </button>
-    <button onclick="showAuth('frost')"
-      style="width:100%;height:64px;background:rgba(14,79,122,0.85);border:2px solid #38b6ff;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 4px 20px rgba(56,182,255,0.5);">
-      ❄️ 霜竜版
-    </button>
+    <div style="font-size:38px;font-weight:900;color:#fff;text-shadow:0 4px 18px rgba(0,0,0,1);letter-spacing:2px;text-align:center;line-height:1.1">突撃くん</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.82);text-shadow:0 2px 10px rgba(0,0,0,.95);margin-top:-6px">モードを選択してください</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:4px">
+      <button onclick="showAuth('svs')"
+        style="height:78px;background:linear-gradient(180deg,rgba(255,154,31,.96),rgba(196,82,0,.92));border:2px solid #ffb347;border-radius:16px;color:#fff;font-size:18px;font-weight:900;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 0 24px rgba(255,138,0,.55), inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(10px);">
+        <div style="font-size:24px;line-height:1">⚔️</div>
+        <div style="margin-top:4px">SVS版</div>
+      </button>
+      <button onclick="showAuth('frost')"
+        style="height:78px;background:linear-gradient(180deg,rgba(56,182,255,.96),rgba(14,103,170,.92));border:2px solid #7dd3fc;border-radius:16px;color:#fff;font-size:18px;font-weight:900;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 0 24px rgba(56,182,255,.55), inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(10px);">
+        <div style="font-size:24px;line-height:1">❄️</div>
+        <div style="margin-top:4px">霜竜版</div>
+      </button>
+    </div>
   `;
   document.body.appendChild(div);
 }
 
 function showAuth(mode){
-  // モード選択の動画・暗幕・UIを削除
-  document.getElementById('mode-select')?.remove();document.getElementById('mode-bg-vid')?.remove();document.getElementById('mode-overlay')?.remove();
-  document.querySelectorAll('video').forEach(v=>{v.pause();v.remove();});
-  document.querySelectorAll('div[style*="rgba(0,0,0,0.55)"]').forEach(v=>v.remove());
-  const isSvs=mode==='svs';
-  const accentColor=isSvs?'#2f81f7':'#38b6ff';
-  const titleText=isSvs?'⚔️ 突撃くん SVS版':'❄️ 突撃くん 霜竜版';
-  const otherLabel=isSvs?'❄️ 霜竜モードへ':'⚔️ SVSモードへ';
-  const switchFn=isSvs?'switchMode(\'frost\')':'switchMode(\'svs\')';
+  cleanupEntranceScreens();
+  const theme=MODE_THEME[mode]||MODE_THEME.svs;
+  const other=mode==='svs'?MODE_THEME.frost:MODE_THEME.svs;
 
-  // ループ動画背景
-  const bgVidUrl=isSvs?REPO_FROST+'svs_bg.mp4':REPO_FROST+'frost_bg.mp4';
   const bgVid=document.createElement('video');
   bgVid.id='auth-bg-vid';
-  bgVid.src=bgVidUrl;
-  bgVid.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:10;';
+  bgVid.className='entrance-layer';
+  bgVid.src=theme.authBg;
+  bgVid.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:10;background:#000;';
   bgVid.autoplay=true;bgVid.loop=true;bgVid.muted=true;bgVid.playsInline=true;
   bgVid.setAttribute('playsinline','');bgVid.setAttribute('webkit-playsinline','');
   document.body.appendChild(bgVid);
   bgVid.play().catch(()=>{});
-  // 暗幕
+
   const bg=document.createElement('div');
   bg.id='auth-bg';
-  bg.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:11;';
+  bg.className='entrance-layer';
+  bg.style.cssText=`position:fixed;inset:0;width:100vw;height:100vh;background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.62));z-index:11;box-shadow:inset 0 0 140px ${theme.glow};`;
   document.body.appendChild(bg);
 
   const div=document.createElement('div');
   div.id='auth-screen';
-  div.style.cssText='position:fixed;top:52%;left:50%;transform:translate(-50%,-50%);z-index:11;width:82%;max-width:300px;display:flex;flex-direction:column;align-items:center;';
+  div.className='entrance-layer';
+  div.style.cssText='position:fixed;top:52%;left:50%;transform:translate(-50%,-50%);z-index:12;width:86%;max-width:330px;display:flex;flex-direction:column;align-items:center;padding:18px 14px;border-radius:18px;background:rgba(5,8,14,.28);backdrop-filter:blur(8px);';
   div.innerHTML=`
-    <div style="font-size:22px;font-weight:800;color:${accentColor};margin-bottom:4px;text-shadow:0 0 16px rgba(0,0,0,1)">${titleText}</div>
-    <div style="font-size:13px;color:#e6edf3;margin-bottom:16px;text-shadow:0 0 10px rgba(0,0,0,1)">パスワードを入力してください</div>
+    <div style="font-size:23px;font-weight:900;color:${theme.accentSoft};margin-bottom:4px;text-shadow:0 0 18px ${theme.glow},0 2px 12px rgba(0,0,0,1);text-align:center">${theme.title}</div>
+    <div style="font-size:13px;color:#f5f7fb;margin-bottom:16px;text-shadow:0 0 10px rgba(0,0,0,1)">パスワードを入力してください</div>
     <input id="pw-input" type="password" placeholder="パスワード"
-      style="width:100%;height:50px;background:rgba(10,14,22,0.92);border:1.5px solid ${accentColor};border-radius:10px;color:#e6edf3;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;"
+      style="width:100%;height:50px;background:rgba(10,14,22,0.92);border:1.5px solid ${theme.border};border-radius:12px;color:#fff;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;box-shadow:0 0 18px ${theme.glow};"
       onkeydown="if(event.key==='Enter')startVideo('${mode}')"/>
     <button onclick="startVideo('${mode}')"
-      style="width:100%;height:50px;background:${isSvs?'#1f6feb':'#0e8fd4'};border:none;border-radius:10px;color:#fff;font-size:17px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;margin-bottom:14px;">
+      style="width:100%;height:52px;background:linear-gradient(180deg,${theme.accent},${theme.accent2});border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:900;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;margin-bottom:14px;box-shadow:0 0 22px ${theme.glow};">
       突撃！
     </button>
-    <div id="pw-err" style="color:#f85149;font-size:13px;min-height:16px;text-shadow:0 0 8px rgba(0,0,0,1);margin-bottom:10px"></div>
-    <button onclick="${switchFn}"
-      style="width:100%;height:42px;background:rgba(10,14,22,0.75);border:1.5px solid ${isSvs?'#38b6ff':'#2f81f7'};border-radius:10px;color:${isSvs?'#7dd3fc':'#58a6ff'};font-size:14px;font-weight:600;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;">
-      ${otherLabel}
+    <div id="pw-err" style="color:#ff5f56;font-size:13px;min-height:16px;text-shadow:0 0 8px rgba(0,0,0,1);margin-bottom:10px"></div>
+    <button onclick="switchMode('${other.key}')"
+      style="width:100%;height:44px;background:rgba(10,14,22,0.78);border:1.5px solid ${other.border};border-radius:12px;color:${other.accentSoft};font-size:14px;font-weight:800;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 0 16px ${other.glow};">
+      ${other.icon} ${other.short}モードへ
     </button>
   `;
   document.body.appendChild(div);
   setTimeout(()=>document.getElementById('pw-input')?.focus(),300);
-  // 現在のモードを記憶
   window._authMode=mode;
 }
 
@@ -1078,19 +1124,19 @@ function switchMode(toMode){
   document.getElementById('auth-screen')?.remove();
   document.getElementById('auth-bg')?.remove();
   document.getElementById('auth-bg-vid')?.remove();
-  // 切り替えエフェクト動画（z-index最前面で黒背景）
+
+  const theme=MODE_THEME[toMode]||MODE_THEME.svs;
   const vwrap=document.createElement('div');
-  vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:50;';
+  vwrap.className='entrance-layer';
+  vwrap.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;background:#000;z-index:50;';
   const vid=document.createElement('video');
-  const videoUrl=toMode==='frost'?REPO_FROST+'switch_to_frost.mp4':REPO_FROST+'switch_to_svs.mp4';
-  vid.src=videoUrl;
-  vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
-  vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');
-  vid.muted=false;
+  vid.src=theme.switchVideo;
+  vid.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+  vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
   const goAuth=()=>{
-    // 動画を即座に非表示にしてからshowAuth
-    vwrap.remove();
-    showAuth(toMode);
+    vwrap.style.transition='opacity 0.35s';
+    vwrap.style.opacity='0';
+    setTimeout(()=>{vwrap.remove();showAuth(toMode);},350);
   };
   vid.onended=goAuth;vid.onerror=goAuth;
   vwrap.appendChild(vid);document.body.appendChild(vwrap);
@@ -1101,7 +1147,7 @@ function startVideo(mode){
   const val=document.getElementById('pw-input')?.value?.trim();
   if(val!==getPass()){
     const err=document.getElementById('pw-err');if(err)err.textContent='パスワードが違います';
-    const inp=document.getElementById('pw-input');if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor=mode==='svs'?'#2f81f7':'#38b6ff';},1000);inp.value='';inp.focus();}
+    const inp=document.getElementById('pw-input');if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor=mode==='svs'?'#ff8a00':'#38b6ff';},1000);inp.value='';inp.focus();}
     return;
   }
   sessionStorage.setItem(`auth_${mode}`,'ok');
