@@ -1034,7 +1034,7 @@ function showAuth(mode){
   const switchFn=isSvs?'switchMode(\'frost\')':'switchMode(\'svs\')';
 
   // ループ動画背景
-  const bgVidUrl=isSvs?REPO_SVS+'svs_bg.mp4':REPO_FROST+'frost_bg.mp4';
+  const bgVidUrl=isSvs?REPO_FROST+'svs_bg.mp4':REPO_FROST+'frost_bg.mp4';
   const bgVid=document.createElement('video');
   bgVid.id='auth-bg-vid';
   bgVid.src=bgVidUrl;
@@ -1102,7 +1102,7 @@ function startVideo(mode){
   }
   sessionStorage.setItem(`auth_${mode}`,'ok');
   document.getElementById('auth-screen')?.remove();document.getElementById('auth-bg')?.remove();document.getElementById('auth-bg-vid')?.remove();
-  const videoUrl=mode==='svs'?REPO_SVS+'intro.mp4':REPO_FROST+'frost_intro.mp4';
+  const videoUrl=mode==='svs'?REPO_FROST+'intro.mp4':REPO_FROST+'frost_intro.mp4';
   const vwrap=document.createElement('div');
   vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
   const vid=document.createElement('video');
