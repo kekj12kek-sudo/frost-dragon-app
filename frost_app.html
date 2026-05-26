@@ -1244,7 +1244,7 @@ function showAuth(mode){
       style="width:100%;height:50px;background:rgba(10,14,22,0.92);border:1.5px solid ${theme.border};border-radius:12px;color:#fff;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;box-shadow:0 0 18px ${theme.glow};"
       onkeydown="if(event.key==='Enter')startVideo('${mode}')"/>
     <div style="display:flex;gap:8px;width:100%;margin-bottom:14px;">
-      <input id="room-input" type="text" inputmode="numeric" maxlength="4" placeholder="1648"
+      <input id="room-input" type="text" inputmode="numeric" maxlength="4" placeholder="部屋番号"
         value="${sessionStorage.getItem(`room_${mode}`)||sessionStorage.getItem('last_room_key')||''}"
         style="flex:0 0 calc(30% - 4px);min-width:0;height:48px;background:rgba(10,14,22,0.92);border:1.5px solid rgba(255,255,255,.22);border-radius:12px;color:#fff;font-size:18px;text-align:center;outline:none;letter-spacing:3px;-webkit-appearance:none;box-shadow:0 0 12px rgba(0,0,0,.35);"
         oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)"
