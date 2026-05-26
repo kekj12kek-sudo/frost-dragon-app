@@ -452,16 +452,21 @@ function sAsgn(key,id){
 }
 
 function rSvsBattle(el){
-  const entries=Object.entries(SS.cityAssign).map(([key,mid])=>({key,face:key[0],idx:parseInt(key.slice(1))-1,mid})).sort((a,b)=>a.face.localeCompare(b.face)||a.idx-b.idx);
+  const entries=Object.entries(SS.cityAssign)
+    .map(([key,mid])=>({key,face:key[0],idx:parseInt(key.slice(1))-1,mid}))
+    .sort((a,b)=>a.face.localeCompare(b.face)||a.idx-b.idx);
+
   el.innerHTML=`
-<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
-  <div>
-    <div style="font-size:12px;color:var(--text2)">${sFactionLabel()} ${sTotalCities()}都市</div>
-    <div style="font-size:11px;color:var(--text3)">参戦: ${SS.active.length}名 / 登録: ${entries.length}名</div>
-  </div>
-  <div style="display:flex;gap:6px">
-    <button class="btn btn-xs btn-success" onclick="sAllJoin()">全員参戦</button>
-    <button class="btn btn-xs" onclick="sAllLeave()" style="color:var(--text3)">全員解除</button>
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div>
+      <div style="font-size:12px;color:var(--text2)">${sFactionLabel()} ${sTotalCities()}都市</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">参戦: ${SS.active.length}名 / 登録: ${entries.length}名</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-xs btn-success" onclick="sAllJoin()">全員参戦</button>
+      <button class="btn btn-xs" onclick="sAllLeave()" style="color:var(--text3)">全員解除</button>
+    </div>
   </div>
 </div>
 ${['A','B'].map(face=>{
@@ -469,56 +474,66 @@ ${['A','B'].map(face=>{
   const ms=sMarchArr(face),pms=sPetArr(face);
   const faceEntries=entries.filter(e=>e.face===face);
   if(!faceEntries.length)return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;text-align:center;color:var(--text3);font-size:13px"><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${fLabel}: 割当なし</div>`;
-  return`<div style="background:var(--bg3);border-radius:8px;padding:6px 10px;margin:12px 0 8px;font-size:11px;font-weight:700;color:var(--text2)"><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${fLabel}</div>
+  return`<div style="background:var(--bg3);border-radius:8px;padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+    <span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span>
+    <span style="font-size:12px;color:var(--text2)">${fLabel}</span>
+  </div>
   ${faceEntries.map(({key,idx,mid})=>{
     const mem=SS.members.find(m=>m.id===mid);if(!mem)return'';
     const isActive=SS.active.includes(mid);
     const hasPet=SS.pet[mid]&&petSt(mid,SS)!=='dead';
-    const march=hasPet?pms[idx]:ms[idx];
+    const baseMarch=ms[idx]+(SS.adjust[mid]?.march||0);
+    const petMarch=pms[idx]+(SS.adjust[mid]?.petMarch||0);
+    const march=hasPet?petMarch:baseMarch;
     const st=petSt(mid,SS);
     const pc={off:'p-off',on:'p-on',warn:'p-warn',low:'p-low',dead:'p-dead'}[st];
-    return`<div style="background:rgba(13,24,41,.88);border:1px solid ${isActive?'rgba(56,182,255,.72)':'rgba(122,156,192,.22)'};border-radius:14px;padding:14px;margin-bottom:12px;opacity:${isActive?1:0.72};box-shadow:0 6px 18px rgba(0,0,0,.18)">
-      <div class="row" style="margin-bottom:${isActive?'8':'0'}px">
-        <div style="flex:1"><div style="font-size:15px;font-weight:700">${mem.name}</div>
-        <div style="font-size:11px;color:var(--text3)">都市${idx+1} — <span style="color:${isActive?(hasPet?'var(--green)':'var(--accent)'):'var(--text3)'};font-weight:700;font-size:15px">${march}</span>秒${hasPet?' 🟢':''}</div></div>
+    return`<div style="background:var(--bg2);border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:12px;padding:12px;margin-bottom:10px;opacity:${isActive?1:0.72};clear:both;overflow:hidden">
+      <div class="row" style="margin-bottom:${isActive?'10':'0'}px">
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700">${mem.name}</div>
+          <div style="font-size:11px;color:var(--text3)">
+            都市${idx+1} —
+            <span style="color:${isActive?(hasPet?'var(--green)':'var(--accent)'):'var(--text3)'};font-weight:700;font-size:15px">${march}</span>秒${hasPet?' 🟢':''}
+          </div>
+        </div>
         <div class="chip" data-t="${mem.team}">${mem.team}</div>
         <button class="btn btn-sm ${isActive?'btn-danger':'btn-success'}" style="width:80px;flex-shrink:0" onclick="sToggleActive(${mid})">${isActive?'不参加':'参戦'}</button>
       </div>
-      ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
-      <!-- 行軍時間微調整 -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span style="font-size:11px;color:var(--text2);width:36px;flex-shrink:0">通常</span>
-        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',-1)">－</button>
-        <span style="font-size:14px;font-weight:700;color:var(--accent);min-width:48px;text-align:center">${march}秒</span>
-        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',1)">＋</button>
-        ${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0}</span>`:''}
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span style="font-size:11px;color:var(--green);width:36px;flex-shrink:0">🐾</span>
-        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
-        <span style="font-size:14px;font-weight:700;color:var(--green);min-width:48px;text-align:center">${sGetBasePetMarch(mid)+(SS.adjust[mid]?.petMarch||0)}秒</span>
-        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
-        ${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0}</span>`:''}
-      </div>
-      ${(SS.adjust[mid]?.march||0)!==0||(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="height:24px;font-size:10px;margin-bottom:4px;color:var(--text3)" onclick="SS.adjust[${mid}]={march:0,petMarch:0};render()">調整リセット</button>`:''}
-      `:''}
-      ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
-        <div class="row" style="margin-bottom:${SS.pet[mid]?'6':'0'}px">
-          <span class="tag ${pc}">${petLbl(mid,SS)}</span>
-          <button class="btn btn-xs" style="width:74px" onclick="sTp(${mid})">${SS.pet[mid]?'停止':'ペットON'}</button>
-          <select class="inp" style="height:30px;font-size:12px;flex:1" onchange="sCTeam(${mid},this.value)">
-            ${TEAMS.map(t=>`<option value="${t}" ${mem.team===t?'selected':''}>${t}</option>`).join('')}
-          </select>
+      ${isActive?`
+      <div style="border-top:1px solid var(--border);padding-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:11px;color:var(--text2);width:36px;flex-shrink:0">通常</span>
+          <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',-1)">－</button>
+          <span style="font-size:14px;font-weight:700;color:var(--accent);min-width:48px;text-align:center">${baseMarch}秒</span>
+          <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',1)">＋</button>
+          ${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0}</span>`:''}
         </div>
-        ${SS.pet[mid]?`<div class="ptp">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
-          <div class="row" style="margin-bottom:4px">
-            <input class="tinp" type="time" value="${fmtT(mid,SS)}" onchange="sSpetT(${mid},this.value)"/>
-            <button class="btn btn-xs" style="width:64px" onclick="sSpetN(${mid})">今すぐ</button>
-            <span style="font-size:11px;color:var(--text2)">から2時間</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:11px;color:var(--green);width:36px;flex-shrink:0">🐾</span>
+          <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
+          <span style="font-size:14px;font-weight:700;color:var(--green);min-width:48px;text-align:center">${petMarch}秒</span>
+          <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
+          ${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0}</span>`:''}
+        </div>
+        ${(SS.adjust[mid]?.march||0)!==0||(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="height:24px;font-size:10px;margin-bottom:8px;color:var(--text3)" onclick="SS.adjust[${mid}]={march:0,petMarch:0};render()">調整リセット</button>`:''}
+        <div style="border-top:1px solid var(--border);padding-top:8px">
+          <div class="row" style="margin-bottom:${SS.pet[mid]?'6':'0'}px">
+            <span class="tag ${pc}">${petLbl(mid,SS)}</span>
+            <button class="btn btn-xs" style="width:74px" onclick="sTp(${mid})">${SS.pet[mid]?'停止':'ペットON'}</button>
+            <select class="inp" style="height:30px;font-size:12px;flex:1" onchange="sCTeam(${mid},this.value)">
+              ${TEAMS.map(t=>`<option value="${t}" ${mem.team===t?'selected':''}>${t}</option>`).join('')}
+            </select>
           </div>
-          <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(mid,SS)}</div>
-        </div>`:''}
+          ${SS.pet[mid]?`<div class="ptp">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
+            <div class="row" style="margin-bottom:4px">
+              <input class="tinp" type="time" value="${fmtT(mid,SS)}" onchange="sSpetT(${mid},this.value)"/>
+              <button class="btn btn-xs" style="width:64px" onclick="sSpetN(${mid})">今すぐ</button>
+              <span style="font-size:11px;color:var(--text2)">から2時間</span>
+            </div>
+            <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(mid,SS)}</div>
+          </div>`:''}
+        </div>
       </div>`:''}
     </div>`;
   }).join('')}`;
@@ -1057,7 +1072,7 @@ function showModeSelect(){
   div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;width:min(92vw,460px);display:flex;flex-direction:column;align-items:center;gap:18px;padding:20px 16px;';
   div.innerHTML=`
     <div style="font-size:14px;font-weight:800;color:#ffdf9a;text-shadow:0 0 8px rgba(255,180,80,.75),0 2px 8px rgba(0,0,0,.95);letter-spacing:3px;text-align:center;margin-bottom:-8px">1648</div>
-    <div style="font-size:38px;font-weight:900;background:linear-gradient(180deg,#ffffff 0%,#ffe7b0 34%,#8fd7ff 72%,#ffffff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 8px rgba(255,180,80,.55),0 0 18px rgba(88,166,255,.45),0 4px 18px rgba(0,0,0,1);letter-spacing:2px;text-align:center;line-height:1.1">突撃くん</div>
+    <div style="font-size:38px;font-weight:900;background:linear-gradient(180deg,#ffffff 0%,#dbefff 28%,#7dc3ff 58%,#3d8cff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 8px rgba(88,166,255,.95),0 0 22px rgba(88,166,255,.55),0 0 46px rgba(56,182,255,.28),0 4px 12px rgba(0,0,0,.92);filter:drop-shadow(0 0 12px rgba(56,182,255,.35));letter-spacing:2px;text-align:center;line-height:1.1">突撃くん</div>
     <div style="font-size:13px;color:rgba(255,255,255,.82);text-shadow:0 2px 10px rgba(0,0,0,.95);margin-top:-6px">モードを選択してください</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:4px">
       <button onclick="showAuth('svs')"
@@ -1106,7 +1121,7 @@ function showAuth(mode){
   const div=document.createElement('div');
   div.id='auth-screen';
   div.className='entrance-layer';
-  div.style.cssText='position:fixed;top:62%;left:50%;transform:translate(-50%,-50%);z-index:12;width:86%;max-width:330px;display:flex;flex-direction:column;align-items:center;padding:18px 14px;border-radius:18px;background:rgba(5,8,14,.22);backdrop-filter:blur(3px);';
+  div.style.cssText='position:fixed;top:62%;left:50%;transform:translate(-50%,-50%);z-index:12;width:86%;max-width:330px;display:flex;flex-direction:column;align-items:center;padding:18px 14px;border-radius:18px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 28px rgba(0,0,0,.22);backdrop-filter:none;';
   div.innerHTML=`
     <div style="font-size:13px;color:#f5f7fb;margin-bottom:16px;text-shadow:0 0 10px rgba(0,0,0,1)">パスワードを入力してください</div>
     <input id="pw-input" type="password" placeholder="パスワード"
