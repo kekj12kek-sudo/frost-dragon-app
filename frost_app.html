@@ -452,88 +452,75 @@ function sAsgn(key,id){
 }
 
 function rSvsBattle(el){
-  const entries=Object.entries(SS.cityAssign)
-    .map(([key,mid])=>({key,face:key[0],idx:parseInt(key.slice(1))-1,mid}))
-    .sort((a,b)=>a.face.localeCompare(b.face)||a.idx-b.idx);
-
+  const entries=Object.entries(SS.cityAssign).map(([key,mid])=>({key,face:key[0],idx:parseInt(key.slice(1))-1,mid})).sort((a,b)=>a.face.localeCompare(b.face)||a.idx-b.idx);
   el.innerHTML=`
-<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-    <div>
-      <div style="font-size:12px;color:var(--text2)">${sFactionLabel()} ${sTotalCities()}都市</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px">参戦: ${SS.active.length}名 / 登録: ${entries.length}名</div>
-    </div>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-xs btn-success" onclick="sAllJoin()">全員参戦</button>
-      <button class="btn btn-xs" onclick="sAllLeave()" style="color:var(--text3)">全員解除</button>
-    </div>
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+  <div>
+    <div style="font-size:12px;color:var(--text2)">${sFactionLabel()} ${sTotalCities()}都市</div>
+    <div style="font-size:11px;color:var(--text3)">参戦: ${SS.active.length}名 / 登録: ${entries.length}名</div>
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-xs btn-success" onclick="sAllJoin()">全員参戦</button>
+    <button class="btn btn-xs" onclick="sAllLeave()" style="color:var(--text3)">全員解除</button>
   </div>
 </div>
 ${['A','B'].map(face=>{
   const fLabel=sFaceLabel(face);
   const ms=sMarchArr(face),pms=sPetArr(face);
   const faceEntries=entries.filter(e=>e.face===face);
-  if(!faceEntries.length)return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;text-align:center;color:var(--text3);font-size:13px"><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${fLabel}: 割当なし</div>`;
-  return`<div style="background:var(--bg3);border-radius:8px;padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-    <span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span>
-    <span style="font-size:12px;color:var(--text2)">${fLabel}</span>
-  </div>
-  ${faceEntries.map(({key,idx,mid})=>{
+  if(!faceEntries.length)return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;text-align:center;color:var(--text3);font-size:13px"><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${fLabel}: 割当なし</div>`;
+  return`<div style="background:var(--bg3);border-radius:8px;padding:6px 10px;margin:14px 0 8px;font-size:11px;font-weight:700;color:var(--text2)"><span class="face-label ${face==='A'?'face1-label':'face2-label'}">${face==='A'?'面A':'面B'}</span> ${fLabel}</div>
+  ${faceEntries.map(({idx,mid})=>{
     const mem=SS.members.find(m=>m.id===mid);if(!mem)return'';
     const isActive=SS.active.includes(mid);
     const hasPet=SS.pet[mid]&&petSt(mid,SS)!=='dead';
-    const baseMarch=ms[idx]+(SS.adjust[mid]?.march||0);
-    const petMarch=pms[idx]+(SS.adjust[mid]?.petMarch||0);
-    const march=hasPet?petMarch:baseMarch;
+    const march=sGetMarch(mid)??(hasPet?pms[idx]:ms[idx]);
+    const normalMarch=sGetBaseMarch(mid);
+    const petMarch=sGetBasePetMarch(mid);
     const st=petSt(mid,SS);
     const pc={off:'p-off',on:'p-on',warn:'p-warn',low:'p-low',dead:'p-dead'}[st];
-    return`<div style="background:var(--bg2);border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:12px;padding:12px;margin-bottom:10px;opacity:${isActive?1:0.72};clear:both;overflow:hidden">
+    const adj=SS.adjust[mid]||{march:0,petMarch:0};
+    return`<div style="background:var(--bg2);border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:14px;padding:14px;margin-bottom:12px;opacity:${isActive?1:0.74};box-shadow:0 8px 20px rgba(0,0,0,.12)">
       <div class="row" style="margin-bottom:${isActive?'10':'0'}px">
         <div style="flex:1">
           <div style="font-size:15px;font-weight:700">${mem.name}</div>
-          <div style="font-size:11px;color:var(--text3)">
-            都市${idx+1} —
-            <span style="color:${isActive?(hasPet?'var(--green)':'var(--accent)'):'var(--text3)'};font-weight:700;font-size:15px">${march}</span>秒${hasPet?' 🟢':''}
-          </div>
+          <div style="font-size:11px;color:var(--text3)">都市${idx+1} — <span style="color:${isActive?(hasPet?'var(--green)':'var(--accent)'):'var(--text3)'};font-weight:700;font-size:15px">${march}</span>秒${hasPet?' 🟢':''}</div>
         </div>
         <div class="chip" data-t="${mem.team}">${mem.team}</div>
         <button class="btn btn-sm ${isActive?'btn-danger':'btn-success'}" style="width:80px;flex-shrink:0" onclick="sToggleActive(${mid})">${isActive?'不参加':'参戦'}</button>
       </div>
-      ${isActive?`
-      <div style="border-top:1px solid var(--border);padding-top:8px">
+      ${isActive?`<div style="border-top:1px solid var(--border);padding-top:10px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <span style="font-size:11px;color:var(--text2);width:36px;flex-shrink:0">通常</span>
           <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',-1)">－</button>
-          <span style="font-size:14px;font-weight:700;color:var(--accent);min-width:48px;text-align:center">${baseMarch}秒</span>
+          <span style="font-size:14px;font-weight:700;color:var(--accent);min-width:48px;text-align:center">${normalMarch+(adj.march||0)}秒</span>
           <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',1)">＋</button>
-          ${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0}</span>`:''}
+          ${(adj.march||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(adj.march||0)>0?'+':''}${adj.march||0}</span>`:''}
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
           <span style="font-size:11px;color:var(--green);width:36px;flex-shrink:0">🐾</span>
           <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
-          <span style="font-size:14px;font-weight:700;color:var(--green);min-width:48px;text-align:center">${petMarch}秒</span>
+          <span style="font-size:14px;font-weight:700;color:var(--green);min-width:48px;text-align:center">${petMarch+(adj.petMarch||0)}秒</span>
           <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
-          ${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0}</span>`:''}
+          ${(adj.petMarch||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(adj.petMarch||0)>0?'+':''}${adj.petMarch||0}</span>`:''}
         </div>
-        ${(SS.adjust[mid]?.march||0)!==0||(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="height:24px;font-size:10px;margin-bottom:8px;color:var(--text3)" onclick="SS.adjust[${mid}]={march:0,petMarch:0};render()">調整リセット</button>`:''}
-        <div style="border-top:1px solid var(--border);padding-top:8px">
-          <div class="row" style="margin-bottom:${SS.pet[mid]?'6':'0'}px">
-            <span class="tag ${pc}">${petLbl(mid,SS)}</span>
-            <button class="btn btn-xs" style="width:74px" onclick="sTp(${mid})">${SS.pet[mid]?'停止':'ペットON'}</button>
-            <select class="inp" style="height:30px;font-size:12px;flex:1" onchange="sCTeam(${mid},this.value)">
-              ${TEAMS.map(t=>`<option value="${t}" ${mem.team===t?'selected':''}>${t}</option>`).join('')}
-            </select>
+        ${(adj.march||0)!==0||(adj.petMarch||0)!==0?`<button class="btn btn-xs" style="height:24px;font-size:10px;margin-bottom:8px;color:var(--text3)" onclick="SS.adjust[${mid}]={march:0,petMarch:0};render()">調整リセット</button>`:''}
+        <div class="row" style="margin-bottom:${SS.pet[mid]?'6':'0'}px">
+          <span class="tag ${pc}">${petLbl(mid,SS)}</span>
+          <button class="btn btn-xs" style="width:74px" onclick="sTp(${mid})">${SS.pet[mid]?'停止':'ペットON'}</button>
+          <select class="inp" style="height:30px;font-size:12px;flex:1" onchange="sCTeam(${mid},this.value)">
+            ${TEAMS.map(t=>`<option value="${t}" ${mem.team===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        ${SS.pet[mid]?`<div class="ptp">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
+          <div class="row" style="margin-bottom:4px">
+            <input class="tinp" type="time" value="${fmtT(mid,SS)}" onchange="sSpetT(${mid},this.value)"/>
+            <button class="btn btn-xs" style="width:64px" onclick="sSpetN(${mid})">今すぐ</button>
+            <span style="font-size:11px;color:var(--text2)">から2時間</span>
           </div>
-          ${SS.pet[mid]?`<div class="ptp">
-            <div style="font-size:11px;color:var(--text2);margin-bottom:6px">ペット開始時刻（押し忘れ補正）</div>
-            <div class="row" style="margin-bottom:4px">
-              <input class="tinp" type="time" value="${fmtT(mid,SS)}" onchange="sSpetT(${mid},this.value)"/>
-              <button class="btn btn-xs" style="width:64px" onclick="sSpetN(${mid})">今すぐ</button>
-              <span style="font-size:11px;color:var(--text2)">から2時間</span>
-            </div>
-            <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(mid,SS)}</div>
-          </div>`:''}
-        </div>
+          <div style="font-size:12px;color:var(--text3)">期限: ${fmtE(mid,SS)}</div>
+        </div>`:''}
       </div>`:''}
     </div>`;
   }).join('')}`;
@@ -617,8 +604,23 @@ function updateEnemyPetDisplay(){
   const el=document.getElementById('enemy-pet-march');
   if(el)el.textContent=pm?`ペット行軍: ${pm}秒`:'';
 }
+
+function sEnemyPetSt(e){
+  if(!e.pet)return{active:false,cls:'p-off',label:'⚪ ペット未使用'};
+  const start=e.petStart||Date.now();
+  const rem=120-(Date.now()-start)/60000;
+  if(rem<=0)return{active:false,cls:'p-dead',label:'⚫ ペット切れ'};
+  const m=Math.floor(rem),sec=Math.floor((rem-m)*60);
+  const time=`${m}:${String(sec).padStart(2,'0')}`;
+  if(rem<=10)return{active:true,cls:'p-low',label:`🔴 残り ${time}`};
+  if(rem<=30)return{active:true,cls:'p-warn',label:`🟡 残り ${time}`};
+  return{active:true,cls:'p-on',label:`🟢 ペット中 ${time}`};
+}
+function sEnemyCurrentMarch(e){
+  const st=sEnemyPetSt(e);
+  return st.active?(e.petMarch??e.march):(e.normalMarch??e.march);
+}
 function rSvsEnemy(el){
-  const ms6=[...M6,...M5].filter((v,i,a)=>a.indexOf(v)===i);
   const allOptions=[
     ...M6.map((m,i)=>`<option value="${i}_6">6都市 都市${i+1}: ${m}秒 / ペット${P6[i]}秒</option>`),
     ...M5.map((m,i)=>`<option value="${i}_5">5都市 都市${i+1}: ${m}秒 / ペット${P5[i]}秒</option>`),
@@ -632,7 +634,7 @@ function rSvsEnemy(el){
     </select>
   </div>
   <div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;gap:16px;align-items:center">
-    <div id="enemy-march-disp" style="font-size:13px;color:var(--text)">都市1: 43秒</div>
+    <div id="enemy-march-disp" style="font-size:13px;color:var(--text)">通常: 43秒</div>
     <div id="enemy-pet-disp" style="font-size:13px;color:var(--green)">ペット: 37秒</div>
     <label class="tgl" style="margin-left:auto"><input type="checkbox" id="ep"/><span class="tsl"></span></label>
     <span style="font-size:12px;color:var(--text2)">ペット</span>
@@ -640,18 +642,19 @@ function rSvsEnemy(el){
   <button class="btn btn-primary btn-sm" onclick="sAddE()">追加</button>
 </div>
 <div class="card" style="margin-top:10px"><div class="sec">敵一覧 (${SS.enemies.length}件)</div>
-  ${SS.enemies.length?SS.enemies.map((e,i)=>`<div class="er">
-    <div style="flex:1">
-      <div style="font-size:14px;font-weight:600">${e.name}</div>
-      <div style="font-size:11px;color:var(--text3)">${e.pet?`🟢ペット ${e.petMarch}秒`:`通常 ${e.march}秒`}</div>
-    </div>
-    <div style="text-align:right;margin-right:8px">
-      <div style="font-size:13px;font-weight:700;color:var(--red)">${e.march}秒</div>
-      <div style="font-size:11px;color:var(--green)">${e.petMarch}秒</div>
-    </div>
-    <span class="tag ${e.pet?'p-on':'p-off'}">${e.pet?'🟢ペット':'⚪'}</span>
-    <button class="btn btn-xs btn-danger" style="width:30px;padding:0;margin-left:4px" onclick="sRmE(${i})">✕</button>
-  </div>`).join(''):'<div class="empty">敵情報なし</div>'}
+  ${SS.enemies.length?SS.enemies.map((e,i)=>{
+    const st=sEnemyPetSt(e);
+    const current=sEnemyCurrentMarch(e);
+    return`<div class="er">
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${e.name}</div>
+        <div style="font-size:11px;color:var(--text3)">通常 ${e.normalMarch??e.march}秒 / ペット ${e.petMarch}秒</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">現在: <span style="font-weight:800;color:${st.active?'var(--green)':'var(--accent)'}">${current}秒</span></div>
+      </div>
+      <span class="tag ${st.cls}">${st.label}</span>
+      <button class="btn btn-xs btn-danger" style="width:30px;padding:0;margin-left:4px" onclick="sRmE(${i})">✕</button>
+    </div>`;
+  }).join(''):'<div class="empty">敵情報なし</div>'}
 </div>`;
   updateEnemyInfo();
 }
@@ -823,17 +826,18 @@ function rFrostEnemy(el){
 <div class="card"><div class="sec">敵情報入力</div>
   <div class="row" style="margin-bottom:8px"><input class="inp fl1" id="en" placeholder="敵集結主名"/></div>
   <div class="row" style="margin-bottom:8px">
-    <span style="font-size:12px;color:var(--text2);width:40px">行軍</span>
-    <input class="inp-num" id="em" type="number" placeholder="秒"/>
-    <label class="tgl" style="margin-left:8px"><input type="checkbox" id="ep"/><span class="tsl"></span></label>
+    <label class="tgl"><input type="checkbox" id="ep"/><span class="tsl"></span></label>
     <span style="font-size:12px;color:var(--text2)">ペット</span>
   </div>
+  <div class="row" style="margin-bottom:8px"><input class="inp fl1" id="enote" placeholder="備考（任意）"/></div>
   <button class="btn btn-primary btn-sm" onclick="fAddE()">追加</button>
 </div>
 <div class="card" style="margin-top:10px"><div class="sec">敵一覧 (${FS.enemies.length}件)</div>
   ${FS.enemies.length?FS.enemies.map((e,i)=>`<div class="er">
-    <div style="flex:1;font-size:14px;font-weight:600">${e.name}</div>
-    <div style="font-size:14px;font-weight:700;color:var(--red);min-width:42px">${e.march}秒</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:600">${e.name}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">${e.note?`備考: ${e.note}`:'備考なし'}</div>
+    </div>
     <span class="tag ${e.pet?'p-on':'p-off'}">${e.pet?'🟢ペットON':'⚪OFF'}</span>
     <button class="btn btn-xs btn-danger" style="width:30px;padding:0" onclick="fRmE(${i})">✕</button>
   </div>`).join(''):'<div class="empty">敵情報なし</div>'}
@@ -922,9 +926,9 @@ function sAddE(){
   const sel=document.getElementById('em');
   const[idxStr,placement]=sel.value.split('_');const idx=parseInt(idxStr);
   const ms=placement==='6'?M6:M5;const ps=placement==='6'?P6:P5;
-  const march=ms[idx],petMarch=ps[idx];
+  const normalMarch=ms[idx],petMarch=ps[idx];
   const pet=document.getElementById('ep')?.checked||false;
-  SS.enemies.push({name:n,march,petMarch,pet});render();
+  SS.enemies.push({name:n,normalMarch,petMarch,march:normalMarch,pet,petStart:pet?Date.now():null});render();
 }
 function sRmE(i){SS.enemies.splice(i,1);render();}
 
@@ -947,7 +951,11 @@ function fTp(id){FS.pet[id]?(FS.pet[id]=false,delete FS.petStart[id]):(FS.pet[id
 function fCTeam(id,t){const m=FS.members.find(m=>m.id===id);if(m)m.team=t;render();}
 function fSpetT(id,ts){const[h,mn]=ts.split(':').map(Number),now=new Date(),t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,mn,0);if(t-now>43200000)t.setDate(t.getDate()-1);FS.petStart[id]=t.getTime();render();}
 function fSpetN(id){FS.petStart[id]=Date.now();render();}
-function fAddE(){const n=document.getElementById('en')?.value?.trim();if(!n){toast('敵名を入力してください');return;}FS.enemies.push({name:n,march:parseInt(document.getElementById('em')?.value||'0'),pet:document.getElementById('ep')?.checked||false});render();}
+function fAddE(){
+  const n=document.getElementById('en')?.value?.trim();if(!n){toast('敵名を入力してください');return;}
+  const note=document.getElementById('enote')?.value?.trim()||'';
+  FS.enemies.push({name:n,pet:document.getElementById('ep')?.checked||false,note});render();
+}
 function fRmE(i){FS.enemies.splice(i,1);render();}
 
 // ============================================================
@@ -959,7 +967,7 @@ function saveAll(){
     members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
   }));
   localStorage.setItem('app_frost',JSON.stringify({
-    members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies
+    members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId
   }));}catch(e){}
 }
 function loadAll(){
@@ -974,7 +982,7 @@ function loadAll(){
   try{
     const f=JSON.parse(localStorage.getItem('app_frost')||'{}');
     if(f.members)FS.members=f.members;if(f.active)FS.active=f.active;
-    if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;
+    if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;if(f.baseId)FS.baseId=f.baseId;
   }catch(e){}
 }
 
@@ -1071,8 +1079,8 @@ function showModeSelect(){
   div.className='entrance-layer';
   div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;width:min(92vw,460px);display:flex;flex-direction:column;align-items:center;gap:18px;padding:20px 16px;';
   div.innerHTML=`
-    <div style="font-size:14px;font-weight:800;color:#ffdf9a;text-shadow:0 0 8px rgba(255,180,80,.75),0 2px 8px rgba(0,0,0,.95);letter-spacing:3px;text-align:center;margin-bottom:-8px">1648</div>
-    <div style="font-size:38px;font-weight:900;background:linear-gradient(180deg,#ffffff 0%,#dbefff 28%,#7dc3ff 58%,#3d8cff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 8px rgba(88,166,255,.95),0 0 22px rgba(88,166,255,.55),0 0 46px rgba(56,182,255,.28),0 4px 12px rgba(0,0,0,.92);filter:drop-shadow(0 0 12px rgba(56,182,255,.35));letter-spacing:2px;text-align:center;line-height:1.1">突撃くん</div>
+    <div style="font-size:13px;font-weight:900;color:#f7d774;text-shadow:-1px -1px 0 rgba(0,0,0,.95),1px -1px 0 rgba(0,0,0,.95),-1px 1px 0 rgba(0,0,0,.95),1px 1px 0 rgba(0,0,0,.95),0 0 10px rgba(255,215,100,.35);letter-spacing:3px;text-align:center;margin-bottom:-8px">1648</div>
+    <div style="font-size:28px;font-weight:900;color:#f7d774;text-shadow:-1px -1px 0 rgba(0,0,0,.95),1px -1px 0 rgba(0,0,0,.95),-1px 1px 0 rgba(0,0,0,.95),1px 1px 0 rgba(0,0,0,.95),0 0 14px rgba(255,215,100,.42),0 3px 12px rgba(0,0,0,1);letter-spacing:2px;text-align:center;line-height:1.1">突撃くん</div>
     <div style="font-size:13px;color:rgba(255,255,255,.82);text-shadow:0 2px 10px rgba(0,0,0,.95);margin-top:-6px">モードを選択してください</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:4px">
       <button onclick="showAuth('svs')"
@@ -1121,7 +1129,7 @@ function showAuth(mode){
   const div=document.createElement('div');
   div.id='auth-screen';
   div.className='entrance-layer';
-  div.style.cssText='position:fixed;top:62%;left:50%;transform:translate(-50%,-50%);z-index:12;width:86%;max-width:330px;display:flex;flex-direction:column;align-items:center;padding:18px 14px;border-radius:18px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 28px rgba(0,0,0,.22);backdrop-filter:none;';
+  div.style.cssText='position:fixed;top:62%;left:50%;transform:translate(-50%,-50%);z-index:12;width:86%;max-width:330px;display:flex;flex-direction:column;align-items:center;padding:18px 14px;border-radius:18px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 32px rgba(0,0,0,.18);';
   div.innerHTML=`
     <div style="font-size:13px;color:#f5f7fb;margin-bottom:16px;text-shadow:0 0 10px rgba(0,0,0,1)">パスワードを入力してください</div>
     <input id="pw-input" type="password" placeholder="パスワード"
@@ -1206,7 +1214,7 @@ window.render=function(){_r();saveAll();};
 
 setInterval(()=>{
   SS.now=Date.now();FS.now=Date.now();
-  if(SS.members.some(m=>SS.active.includes(m.id)&&SS.pet[m.id])||FS.members.some(m=>FS.active.includes(m.id)&&FS.pet[m.id]))render();
+  if(SS.members.some(m=>SS.active.includes(m.id)&&SS.pet[m.id])||FS.members.some(m=>FS.active.includes(m.id)&&FS.pet[m.id])||SS.enemies.some(e=>e.pet))render();
 },10000);
 
 loadAll();
