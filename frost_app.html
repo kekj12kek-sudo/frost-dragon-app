@@ -485,18 +485,22 @@ ${['A','B'].map(face=>{
         <button class="btn btn-sm ${isActive?'btn-danger':'btn-success'}" style="width:80px;flex-shrink:0" onclick="sToggleActive(${mid})">${isActive?'不参加':'参戦'}</button>
       </div>
       ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
-      <!-- 行軍時間微調整（コンパクト1行） -->
-      <div style="display:grid;grid-template-columns:auto 28px 1fr 28px auto 28px 1fr 28px;gap:4px;align-items:center;margin-bottom:8px">
-        <span style="font-size:10px;color:var(--text2)">通常</span>
-        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'march',-1)">－</button>
-        <div style="font-size:12px;font-weight:700;text-align:center;color:var(--accent)">${march}秒${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:10px;color:var(--orange)">${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0}</span>`:''}</div>
-        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'march',1)">＋</button>
-        <span style="font-size:10px;color:var(--green)">🐾</span>
-        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
-        <div style="font-size:12px;font-weight:700;text-align:center;color:var(--green)">${sGetBasePetMarch(mid)+(SS.adjust[mid]?.petMarch||0)}秒${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:10px;color:var(--orange)">${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0}</span>`:''}</div>
-        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
+      <!-- 行軍時間微調整 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--text2);width:36px;flex-shrink:0">通常</span>
+        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',-1)">－</button>
+        <span style="font-size:14px;font-weight:700;color:var(--accent);min-width:48px;text-align:center">${march}秒</span>
+        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',1)">＋</button>
+        ${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0}</span>`:''}
       </div>
-      ${(SS.adjust[mid]?.march||0)!==0||(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="height:24px;font-size:10px;margin-bottom:6px;color:var(--text3)" onclick="SS.adjust[${mid}]={march:0,petMarch:0};render()">調整リセット</button>`:''}
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--green);width:36px;flex-shrink:0">🐾</span>
+        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
+        <span style="font-size:14px;font-weight:700;color:var(--green);min-width:48px;text-align:center">${sGetBasePetMarch(mid)+(SS.adjust[mid]?.petMarch||0)}秒</span>
+        <button class="btn btn-xs" style="width:32px;height:28px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
+        ${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:11px;color:var(--orange)">${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0}</span>`:''}
+      </div>
+      ${(SS.adjust[mid]?.march||0)!==0||(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="height:24px;font-size:10px;margin-bottom:4px;color:var(--text3)" onclick="SS.adjust[${mid}]={march:0,petMarch:0};render()">調整リセット</button>`:''}
       `:''}
       ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
         <div class="row" style="margin-bottom:${SS.pet[mid]?'6':'0'}px">
@@ -757,9 +761,16 @@ function rFrostCalc(el){
 </div>
 ${all.length&&teams.length>1?`<div class="card"><div class="sec">チーム別同時着弾</div>
   ${teams.map(t=>{
-    const tr=fCalcHits(ac.filter(m=>m.team===t));if(!tr.length)return'';
-    const trWm=ac.filter(m=>m.team===t).map(m=>({...m,march:fGetMarch(m.id)})).filter(m=>m.march);
-    const{base:tb,baseMember:tbm}=trWm.length?fGetBase(trWm):{base:0,baseMember:null};
+    const tMems=ac.filter(m=>m.team===t);
+    const trWm=tMems.map(m=>({...m,march:fGetMarch(m.id)})).filter(m=>m.march);
+    if(!trWm.length)return'';
+    // チーム別は常に最短基準（FS.baseIdは無視）
+    const tb=Math.min(...trWm.map(m=>m.march));
+    const tbm=trWm.find(m=>m.march===tb);
+    const tr=trWm.map(m=>{
+      const diff=m.march-tb;
+      return{...m,wait:diff,countLabel:diff>0?String(diff):diff<0?`+${Math.abs(diff)}`:'0'};
+    }).sort((a,b)=>b.wait-a.wait);
     return`<div class="bsec" style="border-left-color:${tc(t)};margin-bottom:10px">
       <div style="font-size:13px;font-weight:700;color:${tc(t)};margin-bottom:4px">チーム ${t}</div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:6px">基準: ${tbm?tbm.name:'—'} ${tb}秒</div>
@@ -979,18 +990,32 @@ function getPass(){return'1648';}
 function checkAuth(mode){return sessionStorage.getItem(`auth_${mode}`)==='ok';}
 
 function showModeSelect(){
-  // モード選択画面
+  // mode_select.mp4をループ再生
+  const vid=document.createElement('video');
+  vid.id='mode-bg-vid';
+  vid.src=REPO_FROST+'mode_select.mp4';
+  vid.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:28;';
+  vid.autoplay=true;vid.loop=true;vid.muted=true;vid.playsInline=true;
+  vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');
+  document.body.appendChild(vid);
+  vid.play().catch(()=>{});
+  // 暗幕
+  const ov=document.createElement('div');
+  ov.id='mode-overlay';
+  ov.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);z-index:29;';
+  document.body.appendChild(ov);
+  // UI
   const div=document.createElement('div');
   div.id='mode-select';
-  div.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0d1117;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;';
+  div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:20px;width:85%;max-width:300px;';
   div.innerHTML=`
-    <div style="font-size:26px;font-weight:800;color:#e6edf3;margin-bottom:20px;text-align:center">突撃くん</div>
+    <div style="font-size:28px;font-weight:800;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,1);text-align:center">突撃くん</div>
     <button onclick="showAuth('svs')"
-      style="width:100%;max-width:300px;height:70px;background:linear-gradient(135deg,#1f6feb,#2f81f7);border:none;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(47,129,247,0.4);">
+      style="width:100%;height:64px;background:rgba(31,111,235,0.85);border:2px solid #2f81f7;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 4px 20px rgba(47,129,247,0.5);">
       ⚔️ SVS版
     </button>
     <button onclick="showAuth('frost')"
-      style="width:100%;max-width:300px;height:70px;background:linear-gradient(135deg,#0e4d7a,#0e8fd4);border:none;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(56,182,255,0.4);">
+      style="width:100%;height:64px;background:rgba(14,79,122,0.85);border:2px solid #38b6ff;border-radius:14px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 4px 20px rgba(56,182,255,0.5);">
       ❄️ 霜竜版
     </button>
   `;
@@ -998,7 +1023,10 @@ function showModeSelect(){
 }
 
 function showAuth(mode){
-  document.getElementById('mode-select')?.remove();
+  // モード選択の動画・暗幕・UIを削除
+  document.getElementById('mode-select')?.remove();document.getElementById('mode-bg-vid')?.remove();document.getElementById('mode-overlay')?.remove();
+  document.querySelectorAll('video').forEach(v=>{v.pause();v.remove();});
+  document.querySelectorAll('div[style*="rgba(0,0,0,0.55)"]').forEach(v=>v.remove());
   const isSvs=mode==='svs';
   const bgUrl=isSvs?REPO_SVS+'intro.jpg':REPO_FROST+'frost_intro.jpg';
   const accentColor=isSvs?'#2f81f7':'#38b6ff';
@@ -1006,13 +1034,20 @@ function showAuth(mode){
   const otherLabel=isSvs?'❄️ 霜竜モードへ':'⚔️ SVSモードへ';
   const switchFn=isSvs?'switchMode(\'frost\')':'switchMode(\'svs\')';
 
+  // ループ動画背景
+  const bgVidUrl=isSvs?REPO_SVS+'svs_bg.mp4':REPO_FROST+'frost_bg.mp4';
+  const bgVid=document.createElement('video');
+  bgVid.id='auth-bg-vid';
+  bgVid.src=bgVidUrl;
+  bgVid.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:10;';
+  bgVid.autoplay=true;bgVid.loop=true;bgVid.muted=true;bgVid.playsInline=true;
+  bgVid.setAttribute('playsinline','');bgVid.setAttribute('webkit-playsinline','');
+  document.body.appendChild(bgVid);
+  // 暗幕
   const bg=document.createElement('div');
   bg.id='auth-bg';
-  bg.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10;overflow:hidden;background:#0d1117;';
-  const bgImg=document.createElement('img');
-  bgImg.src=bgUrl+'?v='+Date.now();
-  bgImg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
-  bg.appendChild(bgImg);document.body.appendChild(bg);
+  bg.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:11;';
+  document.body.appendChild(bg);
 
   const div=document.createElement('div');
   div.id='auth-screen';
@@ -1066,7 +1101,7 @@ function startVideo(mode){
     return;
   }
   sessionStorage.setItem(`auth_${mode}`,'ok');
-  document.getElementById('auth-screen')?.remove();document.getElementById('auth-bg')?.remove();
+  document.getElementById('auth-screen')?.remove();document.getElementById('auth-bg')?.remove();document.getElementById('auth-bg-vid')?.remove();
   const videoUrl=mode==='svs'?REPO_SVS+'intro.mp4':REPO_FROST+'frost_intro.mp4';
   const vwrap=document.createElement('div');
   vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
