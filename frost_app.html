@@ -104,7 +104,7 @@ const firebaseConfig = {
   messagingSenderId: "545717856335",
   appId: "1:545717856335:web:5caa28b344e868826fa23a"
 };
-let fbApp=null, fbDb=null, roomKey='', roomMode='', roomRef=null, isRemoteApplying=false, roomHasRemoteData=false;
+let fbApp=null, fbDb=null, roomKey='', roomMode='', roomRef=null, isRemoteApplying=false, roomHasRemoteData=false, fbSaveTimer=null;
 try{fbApp=firebase.initializeApp(firebaseConfig);fbDb=firebase.database();}catch(e){console.warn('Firebase init failed',e);}
 
 // ============================================================
@@ -1038,7 +1038,11 @@ function saveAll(){
   saveLocal();
   if(isRemoteApplying)return;
   if(fbDb&&roomRef&&roomKey){
-    try{roomRef.set(getStatePayload()).catch(()=>{});}catch(e){}
+    clearTimeout(fbSaveTimer);
+    fbSaveTimer=setTimeout(()=>{
+      if(isRemoteApplying)return;
+      try{roomRef.set(getStatePayload()).catch(()=>{});}catch(e){}
+    },250);
   }
 }
 function loadAll(){
@@ -1061,10 +1065,15 @@ function roomPath(mode,key){return `rooms/${mode}/${key}`;}
 function connectRoom(mode,key){
   roomKey=normalizeRoomKey(key);
   roomMode=mode;
-  sessionStorage.setItem(`room_${mode}`,roomKey);
-  sessionStorage.setItem('last_room_key',roomKey);
-  if(!fbDb||!roomKey){fetchMembers();return;}
+  if(roomKey){
+    sessionStorage.setItem(`room_${mode}`,roomKey);
+    sessionStorage.setItem('last_room_key',roomKey);
+  }else{
+    sessionStorage.removeItem(`room_${mode}`);
+  }
   try{if(roomRef)roomRef.off();}catch(e){}
+  roomRef=null;
+  if(!fbDb||!roomKey){fetchMembers();return;}
   roomRef=fbDb.ref(roomPath(mode,roomKey));
   let first=true;
   roomRef.on('value',snap=>{
@@ -1076,12 +1085,11 @@ function connectRoom(mode,key){
         isRemoteApplying=true;
         applyStatePayload(data);
         saveLocal();
-        isRemoteApplying=false;
         render();
+        isRemoteApplying=false;
       }else{
         roomHasRemoteData=false;
         fetchMembers();
-        setTimeout(()=>saveAll(),250);
       }
       return;
     }
@@ -1089,8 +1097,8 @@ function connectRoom(mode,key){
     isRemoteApplying=true;
     applyStatePayload(data);
     saveLocal();
-    isRemoteApplying=false;
     render();
+    isRemoteApplying=false;
   },err=>{console.warn('Firebase room error',err);toast('共有接続エラー');});
 }
 
@@ -1244,7 +1252,7 @@ function showAuth(mode){
       style="width:100%;height:50px;background:rgba(10,14,22,0.92);border:1.5px solid ${theme.border};border-radius:12px;color:#fff;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;box-shadow:0 0 18px ${theme.glow};"
       onkeydown="if(event.key==='Enter')startVideo('${mode}')"/>
     <div style="display:flex;gap:8px;width:100%;margin-bottom:14px;">
-      <input id="room-input" type="text" inputmode="numeric" maxlength="4" placeholder="部屋番号"
+      <input id="room-input" type="text" inputmode="numeric" maxlength="4" placeholder="room"
         value="${sessionStorage.getItem(`room_${mode}`)||sessionStorage.getItem('last_room_key')||''}"
         style="flex:0 0 calc(30% - 4px);min-width:0;height:48px;background:rgba(10,14,22,0.92);border:1.5px solid rgba(255,255,255,.22);border-radius:12px;color:#fff;font-size:18px;text-align:center;outline:none;letter-spacing:3px;-webkit-appearance:none;box-shadow:0 0 12px rgba(0,0,0,.35);"
         oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)"
@@ -1297,11 +1305,6 @@ function startVideo(mode){
     const inp=document.getElementById('pw-input');if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor=mode==='svs'?'#ff8a00':'#38b6ff';},1000);inp.value='';inp.focus();}
     return;
   }
-  if(!/^\d{4}$/.test(rk)){
-    const err=document.getElementById('pw-err');if(err)err.textContent='4桁のルームキーを入力してください';
-    const inp=document.getElementById('room-input');if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor='rgba(255,255,255,.22)';},1000);inp.focus();}
-    return;
-  }
   sessionStorage.setItem(`auth_${mode}`,'ok');
   document.getElementById('auth-screen')?.remove();document.getElementById('auth-bg')?.remove();document.getElementById('auth-bg-vid')?.remove();document.getElementById('auth-title-label')?.remove();
   const videoUrl=mode==='svs'?REPO_FROST+'intro.mp4':REPO_FROST+'frost_intro.mp4';
@@ -1342,10 +1345,12 @@ loadAll();
 
 // 前回のセッションがあればそのモードで再開、なければモード選択画面
 const lastMode=sessionStorage.getItem('last_mode');
-const lastRoom=sessionStorage.getItem(`room_${lastMode}`)||sessionStorage.getItem('last_room_key');
-if(lastMode&&checkAuth(lastMode)&&lastRoom){
+const lastRoom=lastMode?(sessionStorage.getItem(`room_${lastMode}`)||sessionStorage.getItem('last_room_key')||''):'';
+if(lastMode&&checkAuth(lastMode)){
   document.getElementById('app').style.display='flex';
-  setMode(lastMode);connectRoom(lastMode,lastRoom);
+  setMode(lastMode);
+  if(lastRoom)connectRoom(lastMode,lastRoom);
+  else fetchMembers();
 } else {
   showModeSelect();
 }
