@@ -46,6 +46,7 @@ select.inp{cursor:pointer}
 .chip[data-t="A"]{background:#1a2a3a;color:#58a6ff}.chip[data-t="B"]{background:#1a3a1a;color:var(--green)}
 .chip[data-t="C"]{background:#3a2a0a;color:var(--orange)}.chip[data-t="D"]{background:#3a1a1a;color:var(--red)}
 .chip[data-t="E"]{background:#2a1a3a;color:var(--purple)}
+.chip[data-t="未"]{background:#21262d;color:var(--text3)}
 .ptoggle{display:flex;background:var(--bg);border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:10px}
 .pbtn{flex:1;padding:10px 8px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);line-height:1.4}
 .pbtn.on{background:var(--accent2);color:#fff}
@@ -95,7 +96,7 @@ input:checked+.tsl:before{transform:translateX(22px);background:#fff}
 const REPO_SVS='https://kekj12kek-sudo.github.io/svs-app/';
 const REPO_FROST='https://kekj12kek-sudo.github.io/frost-dragon-app/';
 const GAS_URL='https://script.google.com/macros/s/AKfycbyES7vlaVErWjcK7WAmcM4cHg1s6EL1kQIxsuELXLmf8GbGNLGfnel_Mp-Qg33BKDb8iQ/exec';
-const TEAMS=['A','B','C','D','E'];
+const TEAMS=['未','A','B','C','D','E'];
 
 // SVS定数
 const M6=[43,39,36,36,39,43],M5=[40,37,36,37,40];
@@ -484,27 +485,19 @@ ${['A','B'].map(face=>{
         <button class="btn btn-sm ${isActive?'btn-danger':'btn-success'}" style="width:80px;flex-shrink:0" onclick="sToggleActive(${mid})">${isActive?'不参加':'参戦'}</button>
       </div>
       ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
-      <!-- 行軍時間微調整 -->
-      <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;flex-wrap:wrap">
-        <div style="font-size:11px;color:var(--text2);width:52px;flex-shrink:0">通常調整</div>
-        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',-1)">－</button>
-        <div style="font-size:14px;font-weight:700;min-width:60px;text-align:center;color:var(--accent)">
-          ${sGetBaseMarch(mid)}${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:11px;color:${(SS.adjust[mid]?.march||0)>0?'var(--orange)':'#58a6ff'}">(${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0})</span>`:''}
-          =${march}秒
-        </div>
-        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'march',1)">＋</button>
-        ${(SS.adjust[mid]?.march||0)!==0?`<button class="btn btn-xs" style="width:40px;padding:0;font-size:10px;flex-shrink:0" onclick="sAdjust(${mid},'march',-(SS.adjust[${mid}]?.march||0))">reset</button>`:''}
+      <!-- 行軍時間微調整（コンパクト1行） -->
+      <div style="display:grid;grid-template-columns:auto 28px 1fr 28px auto 28px 1fr 28px;gap:4px;align-items:center;margin-bottom:8px">
+        <span style="font-size:10px;color:var(--text2)">通常</span>
+        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'march',-1)">－</button>
+        <div style="font-size:12px;font-weight:700;text-align:center;color:var(--accent)">${march}秒${(SS.adjust[mid]?.march||0)!==0?`<span style="font-size:10px;color:var(--orange)">${(SS.adjust[mid]?.march||0)>0?'+':''}${SS.adjust[mid]?.march||0}</span>`:''}</div>
+        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'march',1)">＋</button>
+        <span style="font-size:10px;color:var(--green)">🐾</span>
+        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
+        <div style="font-size:12px;font-weight:700;text-align:center;color:var(--green)">${sGetBasePetMarch(mid)+(SS.adjust[mid]?.petMarch||0)}秒${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:10px;color:var(--orange)">${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0}</span>`:''}</div>
+        <button class="btn btn-xs" style="height:26px;padding:0;font-size:14px" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
-        <div style="font-size:11px;color:var(--green);width:52px;flex-shrink:0">🐾調整</div>
-        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-1)">－</button>
-        <div style="font-size:14px;font-weight:700;min-width:60px;text-align:center;color:var(--green)">
-          ${sGetBasePetMarch(mid)}${(SS.adjust[mid]?.petMarch||0)!==0?`<span style="font-size:11px;color:${(SS.adjust[mid]?.petMarch||0)>0?'var(--orange)':'#58a6ff'}">(${(SS.adjust[mid]?.petMarch||0)>0?'+':''}${SS.adjust[mid]?.petMarch||0})</span>`:''}
-          =${sGetBasePetMarch(mid)+(SS.adjust[mid]?.petMarch||0)}秒
-        </div>
-        <button class="btn btn-xs" style="width:34px;padding:0;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',1)">＋</button>
-        ${(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="width:40px;padding:0;font-size:10px;flex-shrink:0" onclick="sAdjust(${mid},'petMarch',-(SS.adjust[${mid}]?.petMarch||0))">reset</button>`:''}
-      </div>`:''}
+      ${(SS.adjust[mid]?.march||0)!==0||(SS.adjust[mid]?.petMarch||0)!==0?`<button class="btn btn-xs" style="height:24px;font-size:10px;margin-bottom:6px;color:var(--text3)" onclick="SS.adjust[${mid}]={march:0,petMarch:0};render()">調整リセット</button>`:''}
+      `:''}
       ${isActive?`<div style="border-top:1px solid var(--border);padding-top:8px">
         <div class="row" style="margin-bottom:${SS.pet[mid]?'6':'0'}px">
           <span class="tag ${pc}">${petLbl(mid,SS)}</span>
