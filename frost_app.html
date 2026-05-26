@@ -1028,7 +1028,6 @@ function showAuth(mode){
   document.querySelectorAll('video').forEach(v=>{v.pause();v.remove();});
   document.querySelectorAll('div[style*="rgba(0,0,0,0.55)"]').forEach(v=>v.remove());
   const isSvs=mode==='svs';
-  const bgUrl=isSvs?REPO_SVS+'intro.jpg':REPO_FROST+'frost_intro.jpg';
   const accentColor=isSvs?'#2f81f7':'#38b6ff';
   const titleText=isSvs?'⚔️ 突撃くん SVS版':'❄️ 突撃くん 霜竜版';
   const otherLabel=isSvs?'❄️ 霜竜モードへ':'⚔️ SVSモードへ';
@@ -1043,6 +1042,7 @@ function showAuth(mode){
   bgVid.autoplay=true;bgVid.loop=true;bgVid.muted=true;bgVid.playsInline=true;
   bgVid.setAttribute('playsinline','');bgVid.setAttribute('webkit-playsinline','');
   document.body.appendChild(bgVid);
+  bgVid.play().catch(()=>{});
   // 暗幕
   const bg=document.createElement('div');
   bg.id='auth-bg';
