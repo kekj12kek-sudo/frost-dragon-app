@@ -89,24 +89,7 @@ input:checked+.tsl:before{transform:translateX(22px);background:#fff}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
-// ============================================================
-// Firebase リアルタイム共有
-// ============================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyB2S7I657C_r_jqK-mCQljM5cvydHX2ToU",
-  authDomain: "totsugeki-web.firebaseapp.com",
-  databaseURL: "https://totsugeki-web-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  projectId: "totsugeki-web",
-  storageBucket: "totsugeki-web.firebasestorage.app",
-  messagingSenderId: "545717856335",
-  appId: "1:545717856335:web:5caa28b344e868826fa23a"
-};
-let fbApp=null, fbDb=null, roomKey='', roomMode='', roomRef=null, isRemoteApplying=false, roomHasRemoteData=false, fbSaveTimer=null;
-try{fbApp=firebase.initializeApp(firebaseConfig);fbDb=firebase.database();}catch(e){console.warn('Firebase init failed',e);}
-
 // ============================================================
 // 共通定数
 // ============================================================
@@ -999,33 +982,7 @@ function fRmE(i){FS.enemies.splice(i,1);render();}
 // ============================================================
 // 保存・復元
 // ============================================================
-function getStatePayload(){
-  return {
-    version:1,
-    updatedAt:Date.now(),
-    svs:{
-      split:SS.split,faction:SS.faction,placementA:SS.placementA,placementB:SS.placementB,
-      members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
-    },
-    frost:{
-      members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId
-    }
-  };
-}
-function applyStatePayload(d){
-  if(!d)return;
-  const s=d.svs||d.SS||{};
-  if(s.split)SS.split=s.split;if(s.faction)SS.faction=s.faction;
-  if(s.placementA)SS.placementA=s.placementA;if(s.placementB)SS.placementB=s.placementB;
-  if(s.members)SS.members=s.members;if(s.cityAssign)SS.cityAssign=s.cityAssign;
-  if(s.active)SS.active=s.active;if(s.pet)SS.pet=s.pet;if(s.petStart)SS.petStart=s.petStart;
-  if(s.enemies)SS.enemies=s.enemies;if(s.adjust)SS.adjust=s.adjust;
-  const f=d.frost||d.FS||{};
-  if(f.members)FS.members=f.members;if(f.active)FS.active=f.active;
-  if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;
-  if(f.baseId!==undefined)FS.baseId=f.baseId;
-}
-function saveLocal(){
+function saveAll(){
   try{localStorage.setItem('app_svs',JSON.stringify({
     split:SS.split,faction:SS.faction,placementA:SS.placementA,placementB:SS.placementB,
     members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
@@ -1033,17 +990,6 @@ function saveLocal(){
   localStorage.setItem('app_frost',JSON.stringify({
     members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId
   }));}catch(e){}
-}
-function saveAll(){
-  saveLocal();
-  if(isRemoteApplying)return;
-  if(fbDb&&roomRef&&roomKey){
-    clearTimeout(fbSaveTimer);
-    fbSaveTimer=setTimeout(()=>{
-      if(isRemoteApplying)return;
-      try{roomRef.set(getStatePayload()).catch(()=>{});}catch(e){}
-    },250);
-  }
 }
 function loadAll(){
   try{
@@ -1057,49 +1003,8 @@ function loadAll(){
   try{
     const f=JSON.parse(localStorage.getItem('app_frost')||'{}');
     if(f.members)FS.members=f.members;if(f.active)FS.active=f.active;
-    if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;if(f.baseId!==undefined)FS.baseId=f.baseId;
+    if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;if(f.baseId)FS.baseId=f.baseId;
   }catch(e){}
-}
-function normalizeRoomKey(v){return String(v||'').replace(/\D/g,'').slice(0,4);}
-function roomPath(mode,key){return `rooms/${mode}/${key}`;}
-function connectRoom(mode,key){
-  roomKey=normalizeRoomKey(key);
-  roomMode=mode;
-  if(roomKey){
-    sessionStorage.setItem(`room_${mode}`,roomKey);
-    sessionStorage.setItem('last_room_key',roomKey);
-  }else{
-    sessionStorage.removeItem(`room_${mode}`);
-  }
-  try{if(roomRef)roomRef.off();}catch(e){}
-  roomRef=null;
-  if(!fbDb||!roomKey){fetchMembers();return;}
-  roomRef=fbDb.ref(roomPath(mode,roomKey));
-  let first=true;
-  roomRef.on('value',snap=>{
-    const data=snap.val();
-    if(first){
-      first=false;
-      if(data){
-        roomHasRemoteData=true;
-        isRemoteApplying=true;
-        applyStatePayload(data);
-        saveLocal();
-        render();
-        isRemoteApplying=false;
-      }else{
-        roomHasRemoteData=false;
-        fetchMembers();
-      }
-      return;
-    }
-    if(!data)return;
-    isRemoteApplying=true;
-    applyStatePayload(data);
-    saveLocal();
-    render();
-    isRemoteApplying=false;
-  },err=>{console.warn('Firebase room error',err);toast('共有接続エラー');});
 }
 
 // ============================================================
@@ -1171,10 +1076,50 @@ function cleanupEntranceScreens(){
   document.querySelectorAll('video').forEach(v=>{if(v.id==='mode-bg-vid'||v.id==='auth-bg-vid'){v.pause();v.remove();}});
 }
 
+
+// ============================================================
+// 動画プリロード（スマホのモード切替・ログイン背景切替を軽量化）
+// ============================================================
+const PRELOAD_VIDEO_LIST=[
+  REPO_FROST+'mode_select.mp4',
+  MODE_THEME.svs.authBg,
+  MODE_THEME.frost.authBg,
+  MODE_THEME.svs.intro,
+  MODE_THEME.frost.intro,
+  MODE_THEME.svs.switchVideo,
+  MODE_THEME.frost.switchVideo
+];
+let _preloadStarted=false;
+function warmupEntranceVideos(){
+  if(_preloadStarted)return;
+  _preloadStarted=true;
+  PRELOAD_VIDEO_LIST.forEach((src,i)=>{
+    if(!src)return;
+    const v=document.createElement('video');
+    v.id='preload-video-'+i;
+    v.src=src;
+    v.preload='auto';
+    v.muted=true;
+    v.playsInline=true;
+    v.setAttribute('playsinline','');
+    v.setAttribute('webkit-playsinline','');
+    v.style.cssText='position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:-9999px;';
+    document.body.appendChild(v);
+    try{v.load();}catch(e){}
+  });
+}
+function applyVideoFastLoad(video){
+  video.preload='auto';
+  video.setAttribute('preload','auto');
+  video.setAttribute('playsinline','');
+  video.setAttribute('webkit-playsinline','');
+  return video;
+}
+
 function showModeSelect(){
   cleanupEntranceScreens();
 
-  const vid=document.createElement('video');
+  const vid=applyVideoFastLoad(document.createElement('video'));
   vid.id='mode-bg-vid';
   vid.className='entrance-layer';
   vid.src=REPO_FROST+'mode_select.mp4';
@@ -1219,7 +1164,7 @@ function showAuth(mode){
   const theme=MODE_THEME[mode]||MODE_THEME.svs;
   const other=mode==='svs'?MODE_THEME.frost:MODE_THEME.svs;
 
-  const bgVid=document.createElement('video');
+  const bgVid=applyVideoFastLoad(document.createElement('video'));
   bgVid.id='auth-bg-vid';
   bgVid.className='entrance-layer';
   bgVid.src=theme.authBg;
@@ -1251,17 +1196,10 @@ function showAuth(mode){
     <input id="pw-input" type="password" placeholder="パスワード"
       style="width:100%;height:50px;background:rgba(10,14,22,0.92);border:1.5px solid ${theme.border};border-radius:12px;color:#fff;font-size:18px;text-align:center;outline:none;margin-bottom:10px;letter-spacing:4px;-webkit-appearance:none;box-shadow:0 0 18px ${theme.glow};"
       onkeydown="if(event.key==='Enter')startVideo('${mode}')"/>
-    <div style="display:flex;gap:8px;width:100%;margin-bottom:14px;">
-      <input id="room-input" type="text" inputmode="numeric" maxlength="4" placeholder="room"
-        value="${sessionStorage.getItem(`room_${mode}`)||sessionStorage.getItem('last_room_key')||''}"
-        style="flex:0 0 calc(30% - 4px);min-width:0;height:48px;background:rgba(10,14,22,0.92);border:1.5px solid rgba(255,255,255,.22);border-radius:12px;color:#fff;font-size:18px;text-align:center;outline:none;letter-spacing:3px;-webkit-appearance:none;box-shadow:0 0 12px rgba(0,0,0,.35);"
-        oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)"
-        onkeydown="if(event.key==='Enter')startVideo('${mode}')"/>
-      <button onclick="startVideo('${mode}')"
-        style="flex:0 0 calc(70% - 4px);min-width:0;height:48px;background:linear-gradient(180deg,${theme.accent},${theme.accent2});border:none;border-radius:12px;color:#fff;font-size:17px;font-weight:900;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 0 22px ${theme.glow};">
-        突撃！
-      </button>
-    </div>
+    <button onclick="startVideo('${mode}')"
+      style="width:100%;height:52px;background:linear-gradient(180deg,${theme.accent},${theme.accent2});border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:900;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;margin-bottom:14px;box-shadow:0 0 22px ${theme.glow};">
+      突撃！
+    </button>
     <div id="pw-err" style="color:#ff5f56;font-size:13px;min-height:16px;text-shadow:0 0 8px rgba(0,0,0,1);margin-bottom:10px"></div>
     <button onclick="switchMode('${other.key}')"
       style="width:100%;height:44px;background:rgba(10,14,22,0.78);border:1.5px solid ${other.border};border-radius:12px;color:${other.accentSoft};font-size:14px;font-weight:800;cursor:pointer;-webkit-appearance:none;touch-action:manipulation;box-shadow:0 0 16px ${other.glow};">
@@ -1283,7 +1221,7 @@ function switchMode(toMode){
   const vwrap=document.createElement('div');
   vwrap.className='entrance-layer';
   vwrap.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;background:#000;z-index:50;';
-  const vid=document.createElement('video');
+  const vid=applyVideoFastLoad(document.createElement('video'));
   vid.src=theme.switchVideo;
   vid.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
   vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
@@ -1299,7 +1237,6 @@ function switchMode(toMode){
 
 function startVideo(mode){
   const val=document.getElementById('pw-input')?.value?.trim();
-  const rk=normalizeRoomKey(document.getElementById('room-input')?.value?.trim());
   if(val!==getPass()){
     const err=document.getElementById('pw-err');if(err)err.textContent='パスワードが違います';
     const inp=document.getElementById('pw-input');if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor=mode==='svs'?'#ff8a00':'#38b6ff';},1000);inp.value='';inp.focus();}
@@ -1310,7 +1247,7 @@ function startVideo(mode){
   const videoUrl=mode==='svs'?REPO_FROST+'intro.mp4':REPO_FROST+'frost_intro.mp4';
   const vwrap=document.createElement('div');
   vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
-  const vid=document.createElement('video');
+  const vid=applyVideoFastLoad(document.createElement('video'));
   vid.src=videoUrl;
   vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
   vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
@@ -1322,7 +1259,7 @@ function startVideo(mode){
       document.getElementById('app').style.opacity='0';
       document.getElementById('app').style.transition='opacity 0.4s';
       setTimeout(()=>{document.getElementById('app').style.opacity='1';},30);
-      setMode(mode);connectRoom(mode,rk);
+      setMode(mode);fetchMembers();
     },500);
   };
   vid.onended=goMain;vid.onerror=goMain;
@@ -1342,15 +1279,13 @@ setInterval(()=>{
 },10000);
 
 loadAll();
+warmupEntranceVideos();
 
 // 前回のセッションがあればそのモードで再開、なければモード選択画面
 const lastMode=sessionStorage.getItem('last_mode');
-const lastRoom=lastMode?(sessionStorage.getItem(`room_${lastMode}`)||sessionStorage.getItem('last_room_key')||''):'';
 if(lastMode&&checkAuth(lastMode)){
   document.getElementById('app').style.display='flex';
-  setMode(lastMode);
-  if(lastRoom)connectRoom(lastMode,lastRoom);
-  else fetchMembers();
+  setMode(lastMode);fetchMembers();
 } else {
   showModeSelect();
 }
