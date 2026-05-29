@@ -4,15 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>突撃くん</title>
-<link rel="preconnect" href="https://kekj12kek-sudo.github.io" crossorigin>
-<link rel="dns-prefetch" href="https://kekj12kek-sudo.github.io">
 <style>
 /* ============ 共通 ============ */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{color:#e6edf3;font-family:'Hiragino Kana','Hiragino Sans','Yu Gothic',sans-serif;font-size:14px;overscroll-behavior:none}
 body.mode-svs{background:#060d1a}
 body.mode-frost{background:#060d1a}
-#video-preload-bin{position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:-1}
 
 /* SVS カラー */
 .svs-mode{--bg:#060d1a;--bg2:#0d1829;--bg3:#142035;--bg4:#1c2e47;--border:#1c3050;--border2:#2a4570;--text:#e0eeff;--text2:#7a9cc0;--text3:#4a6a90;--accent:#38b6ff;--accent2:#0e8fd4;--green:#3fb950;--red:#f85149;--orange:#e3b341;--purple:#a371f7;--hi:#7dd3fc;}
@@ -1168,93 +1165,6 @@ const MODE_THEME={
   }
 };
 
-// ============================================================
-// 動画プリロード高速化
-// - この安定版のルーム処理は維持
-// - 入口動画だけを先読みして、黒画面/待ち時間を軽減
-// ============================================================
-const PRELOADED_VIDEOS = new Map();
-const PRELOADED_LINKS = new Set();
-
-function addVideoPreloadLink(url){
-  if(!url || PRELOADED_LINKS.has(url))return;
-  PRELOADED_LINKS.add(url);
-  try{
-    const link=document.createElement('link');
-    link.rel='preload';
-    link.as='video';
-    link.href=url;
-    link.crossOrigin='anonymous';
-    document.head.appendChild(link);
-  }catch(e){}
-}
-
-function getPreloadBin(){
-  let bin=document.getElementById('video-preload-bin');
-  if(!bin){
-    bin=document.createElement('div');
-    bin.id='video-preload-bin';
-    document.body.appendChild(bin);
-  }
-  return bin;
-}
-
-function preloadVideo(url){
-  if(!url || PRELOADED_VIDEOS.has(url))return PRELOADED_VIDEOS.get(url);
-  addVideoPreloadLink(url);
-  const v=document.createElement('video');
-  v.src=url;
-  v.preload='auto';
-  v.muted=true;
-  v.playsInline=true;
-  v.setAttribute('playsinline','');
-  v.setAttribute('webkit-playsinline','');
-  v.style.cssText='width:1px;height:1px;opacity:0;pointer-events:none;';
-  try{v.load();}catch(e){}
-  getPreloadBin().appendChild(v);
-  PRELOADED_VIDEOS.set(url,v);
-  return v;
-}
-
-function warmupModeVideos(){
-  preloadVideo(REPO_FROST+'mode_select.mp4');
-  // 少し遅らせて他の入口動画を先読み。初回表示の邪魔をしない。
-  setTimeout(()=>{
-    preloadVideo(MODE_THEME.svs.authBg);
-    preloadVideo(MODE_THEME.frost.authBg);
-    preloadVideo(MODE_THEME.svs.switchVideo);
-    preloadVideo(MODE_THEME.frost.switchVideo);
-  },300);
-}
-
-function warmupAuthVideos(mode){
-  const theme=MODE_THEME[mode]||MODE_THEME.svs;
-  const other=mode==='svs'?MODE_THEME.frost:MODE_THEME.svs;
-  preloadVideo(theme.authBg);
-  preloadVideo(theme.intro);
-  setTimeout(()=>{
-    preloadVideo(other.authBg);
-    preloadVideo(other.switchVideo);
-  },300);
-}
-
-function makeEntranceVideo(id,url,css,{loop=false,muted=true}={}){
-  preloadVideo(url);
-  const vid=document.createElement('video');
-  vid.id=id;
-  vid.className='entrance-layer';
-  vid.src=url;
-  vid.preload='auto';
-  vid.style.cssText=css;
-  vid.autoplay=true;
-  vid.loop=loop;
-  vid.muted=muted;
-  vid.playsInline=true;
-  vid.setAttribute('playsinline','');
-  vid.setAttribute('webkit-playsinline','');
-  return vid;
-}
-
 function cleanupEntranceScreens(){
   ['mode-select','mode-bg-vid','mode-overlay','auth-screen','auth-bg','auth-bg-vid','auth-title-label'].forEach(id=>document.getElementById(id)?.remove());
   document.querySelectorAll('.entrance-layer').forEach(el=>el.remove());
@@ -1264,13 +1174,13 @@ function cleanupEntranceScreens(){
 function showModeSelect(){
   cleanupEntranceScreens();
 
-  warmupModeVideos();
-  const vid=makeEntranceVideo(
-    'mode-bg-vid',
-    REPO_FROST+'mode_select.mp4',
-    'position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:28;background:#000;',
-    {loop:true,muted:true}
-  );
+  const vid=document.createElement('video');
+  vid.id='mode-bg-vid';
+  vid.className='entrance-layer';
+  vid.src=REPO_FROST+'mode_select.mp4';
+  vid.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:28;background:#000;';
+  vid.autoplay=true;vid.loop=true;vid.muted=true;vid.playsInline=true;
+  vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');
   document.body.appendChild(vid);
   vid.play().catch(()=>{});
 
@@ -1309,13 +1219,13 @@ function showAuth(mode){
   const theme=MODE_THEME[mode]||MODE_THEME.svs;
   const other=mode==='svs'?MODE_THEME.frost:MODE_THEME.svs;
 
-  warmupAuthVideos(mode);
-  const bgVid=makeEntranceVideo(
-    'auth-bg-vid',
-    theme.authBg,
-    'position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:10;background:#000;',
-    {loop:true,muted:true}
-  );
+  const bgVid=document.createElement('video');
+  bgVid.id='auth-bg-vid';
+  bgVid.className='entrance-layer';
+  bgVid.src=theme.authBg;
+  bgVid.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:10;background:#000;';
+  bgVid.autoplay=true;bgVid.loop=true;bgVid.muted=true;bgVid.playsInline=true;
+  bgVid.setAttribute('playsinline','');bgVid.setAttribute('webkit-playsinline','');
   document.body.appendChild(bgVid);
   bgVid.play().catch(()=>{});
 
@@ -1373,13 +1283,10 @@ function switchMode(toMode){
   const vwrap=document.createElement('div');
   vwrap.className='entrance-layer';
   vwrap.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;background:#000;z-index:50;';
-  const vid=makeEntranceVideo(
-    '',
-    theme.switchVideo,
-    'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;',
-    {loop:false,muted=false}
-  );
-  vid.removeAttribute('id');
+  const vid=document.createElement('video');
+  vid.src=theme.switchVideo;
+  vid.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+  vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
   const goAuth=()=>{
     vwrap.style.transition='opacity 0.35s';
     vwrap.style.opacity='0';
@@ -1403,10 +1310,8 @@ function startVideo(mode){
   const videoUrl=mode==='svs'?REPO_FROST+'intro.mp4':REPO_FROST+'frost_intro.mp4';
   const vwrap=document.createElement('div');
   vwrap.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20;';
-  preloadVideo(videoUrl);
   const vid=document.createElement('video');
   vid.src=videoUrl;
-  vid.preload='auto';
   vid.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;';
   vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');vid.muted=false;
   const goMain=()=>{
@@ -1437,7 +1342,6 @@ setInterval(()=>{
 },10000);
 
 loadAll();
-warmupModeVideos();
 
 // 前回のセッションがあればそのモードで再開、なければモード選択画面
 const lastMode=sessionStorage.getItem('last_mode');
