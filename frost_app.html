@@ -973,7 +973,7 @@ function sendGameChat(mode,kind,label){
     navigator.clipboard.writeText(txt).catch(()=>{});
     toast('Windowsツール未起動。内容をコピーしました');
   }).finally(()=>{
-    setTimeout(()=>setGameChatButtonsDisabled(false),8000);
+    setTimeout(()=>setGameChatButtonsDisabled(false),5000);
   });
 }
 
