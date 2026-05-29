@@ -922,34 +922,58 @@ function renderWhUI(mode){
 </div>`;
 }
 
-function buildGameChatText(mode){
-  if(mode==='svs'){
-    const ac=SS.members.filter(m=>SS.active.includes(m.id));
-    return sCalcHits(ac).map(r=>`${r.name} ${r.wait}`).join('\n');
-  }
-  const ac=FS.members.filter(m=>FS.active.includes(m.id));
-  return fCalcHits(ac).map(r=>`${r.name} ${r.wait}`).join('\n');
+function getCopyBoxText(id){
+  const el=document.getElementById(id);
+  if(!el)return'';
+  const txt=(el.textContent||'').trim();
+  if(!txt || txt.startsWith('(') || txt==='(なし)')return'';
+  return txt;
+}
+function buildGameChatText(kind){
+  if(kind==='all')return getCopyBoxText('cp-all');
+  if(kind==='chunk0')return getCopyBoxText('cp-c0');
+  if(kind==='chunk1')return getCopyBoxText('cp-c1');
+  return'';
 }
 function renderGameChatUI(mode){
   if(!IS_MASTER)return'';
-  return`<div class="card" style="margin-top:10px;border-color:rgba(247,215,116,.5);box-shadow:0 0 18px rgba(247,215,116,.08)"><div class="sec">👑 MASTER — ゲームチャット送信</div>
-    <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px">Windows送信ツールへ転送し、BlueStacksマクロでゲーム内チャットへ送信します。</div>
-    <button class="btn" style="background:linear-gradient(180deg,#d9a441,#9a6b12);border-color:#f7d774;color:#fff;font-weight:900" onclick="sendGameChat('${mode}')">👑 ゲームチャット送信</button>
+  return`<div class="card" style="margin-top:10px;border-color:rgba(247,215,116,.5);box-shadow:0 0 18px rgba(247,215,116,.08)">
+    <div class="sec">👑 MASTER — ゲームチャット送信</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">Windows送信ツールへ転送し、BlueStacksでゲーム内チャットへ送信します。ゲーム内チャット制限対策として、必要な枠だけ個別送信します。</div>
+    <div style="display:grid;grid-template-columns:1fr;gap:8px">
+      <button class="btn" id="game-send-all" style="background:linear-gradient(180deg,#d9a441,#9a6b12);border-color:#f7d774;color:#fff;font-weight:900" onclick="sendGameChat('${mode}','all','全体同着')">👑 全体同着送信</button>
+      <button class="btn" id="game-send-c0" style="background:linear-gradient(180deg,#1f6feb,#174ea6);border-color:#58a6ff;color:#fff;font-weight:900" onclick="sendGameChat('${mode}','chunk0','チームA・B')">👑 チームA・B送信</button>
+      <button class="btn" id="game-send-c1" style="background:linear-gradient(180deg,#7c3aed,#5b21b6);border-color:#a371f7;color:#fff;font-weight:900" onclick="sendGameChat('${mode}','chunk1','チームC・D')">👑 チームC・D送信</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.5;margin-top:8px">※送信中は連打せず、完了表示後に次を送信してください。</div>
   </div>`;
 }
-function sendGameChat(mode){
-  const txt=buildGameChatText(mode).trim();
-  if(!txt){toast('送信する内容がありません');return;}
+function setGameChatButtonsDisabled(disabled){
+  ['game-send-all','game-send-c0','game-send-c1'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(!b)return;
+    b.disabled=disabled;
+    b.style.opacity=disabled?'0.55':'1';
+    b.style.pointerEvents=disabled?'none':'auto';
+  });
+}
+function sendGameChat(mode,kind,label){
+  const txt=buildGameChatText(kind).trim();
+  if(!txt){toast(`${label}の送信内容がありません`);return;}
+  setGameChatButtonsDisabled(true);
+  toast(`${label} 送信中...`);
   fetch('http://127.0.0.1:1648/send',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({mode,text:txt,source:'web-totsugekikun',ts:Date.now()})
+    body:JSON.stringify({mode,kind,label,text:txt,source:'web-totsugekikun',ts:Date.now()})
   }).then(r=>{
-    if(r.ok)toast('ゲームチャット送信指示を送りました');
+    if(r.ok)toast(`${label} 送信指示を送りました`);
     else throw new Error('bad response');
   }).catch(()=>{
     navigator.clipboard.writeText(txt).catch(()=>{});
     toast('Windowsツール未起動。内容をコピーしました');
+  }).finally(()=>{
+    setTimeout(()=>setGameChatButtonsDisabled(false),8000);
   });
 }
 
