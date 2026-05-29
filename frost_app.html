@@ -73,6 +73,7 @@ input:checked+.tsl:before{transform:translateX(22px);background:#fff}
 .face-label{font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;margin-bottom:6px;display:inline-block}
 .face1-label{background:#1a2a3a;color:var(--accent)}
 .face2-label{background:#2a1a3a;color:var(--purple)}
+.master-badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 8px;border-radius:999px;background:rgba(247,215,116,.14);border:1px solid rgba(247,215,116,.55);color:#f7d774;font-size:11px;font-weight:900;letter-spacing:.5px;text-shadow:0 0 8px rgba(0,0,0,.85);margin-top:3px}
 </style>
 </head>
 <body class="mode-svs">
@@ -123,9 +124,11 @@ const P6=[37,33,30,30,33,37],P5=[34,31,30,31,34];
 // モード管理
 // ============================================================
 let MODE='svs'; // 'svs' or 'frost'
+let IS_MASTER=false;
 
 function setMode(m){
   MODE=m;
+  IS_MASTER=sessionStorage.getItem(`master_${m}`)==='1';
   const app=document.getElementById('app');
   const body=document.body;
   if(m==='svs'){
@@ -343,11 +346,11 @@ function render(){
   const el=document.getElementById('content');
   if(MODE==='svs'){
     const hdrInfo=document.getElementById('hdr-info');
-    hdrInfo.textContent=`${sFactionLabel()}\n割当${Object.keys(SS.cityAssign).length}/${sTotalCities()}`;
+    hdrInfo.textContent=`${sFactionLabel()}\n割当${Object.keys(SS.cityAssign).length}/${sTotalCities()}${IS_MASTER?'\n👑 MASTER':''}`;
     ({setup:rSvsSetup,battle:rSvsBattle,calc:rSvsCalc,copy:rSvsCopy,enemy:rSvsEnemy})[tab]?.(el);
   } else {
     const ac=FS.members.filter(m=>FS.active.includes(m.id));
-    document.getElementById('hdr-info').textContent=`参戦: ${ac.length}名`;
+    document.getElementById('hdr-info').textContent=`参戦: ${ac.length}名${IS_MASTER?'\n👑 MASTER':''}`;
     ({battle:rFrostBattle,calc:rFrostCalc,copy:rFrostCopy,enemy:rFrostEnemy})[tab]?.(el);
   }
 }
@@ -612,7 +615,8 @@ ${chunks.map((chunk,i)=>`<div class="card" style="margin-top:10px"><div class="s
   <div class="cpbox" id="cp-c${i}">${makeTeamText(chunk)||'(なし)'}</div>
   <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-c${i}').textContent)">コピー（${i+1}回目）</button>
 </div>`).join('')}
-${renderWhUI('svs')}`;
+${renderWhUI('svs')}
+${renderGameChatUI('svs')}`;
   renderWhList();
 }
 
@@ -855,7 +859,8 @@ ${chunks.map((chunk,i)=>`<div class="card" style="margin-top:10px"><div class="s
   <div class="cpbox" id="cp-c${i}">${makeTeamText(chunk)||'(なし)'}</div>
   <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-c${i}').textContent)">コピー（${i+1}回目）</button>
 </div>`).join('')}
-${renderWhUI('frost')}`;
+${renderWhUI('frost')}
+${renderGameChatUI('frost')}`;
   renderWhList();
 }
 
@@ -916,6 +921,38 @@ function renderWhUI(mode){
   <button class="btn btn-primary" onclick="sendD('${mode}')">Discordへ送信</button>
 </div>`;
 }
+
+function buildGameChatText(mode){
+  if(mode==='svs'){
+    const ac=SS.members.filter(m=>SS.active.includes(m.id));
+    return sCalcHits(ac).map(r=>`${r.name} ${r.wait}`).join('\n');
+  }
+  const ac=FS.members.filter(m=>FS.active.includes(m.id));
+  return fCalcHits(ac).map(r=>`${r.name} ${r.wait}`).join('\n');
+}
+function renderGameChatUI(mode){
+  if(!IS_MASTER)return'';
+  return`<div class="card" style="margin-top:10px;border-color:rgba(247,215,116,.5);box-shadow:0 0 18px rgba(247,215,116,.08)"><div class="sec">👑 MASTER — ゲームチャット送信</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px">Windows送信ツールへ転送し、BlueStacksマクロでゲーム内チャットへ送信します。</div>
+    <button class="btn" style="background:linear-gradient(180deg,#d9a441,#9a6b12);border-color:#f7d774;color:#fff;font-weight:900" onclick="sendGameChat('${mode}')">👑 ゲームチャット送信</button>
+  </div>`;
+}
+function sendGameChat(mode){
+  const txt=buildGameChatText(mode).trim();
+  if(!txt){toast('送信する内容がありません');return;}
+  fetch('http://127.0.0.1:1648/send',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mode,text:txt,source:'web-totsugekikun',ts:Date.now()})
+  }).then(r=>{
+    if(r.ok)toast('ゲームチャット送信指示を送りました');
+    else throw new Error('bad response');
+  }).catch(()=>{
+    navigator.clipboard.writeText(txt).catch(()=>{});
+    toast('Windowsツール未起動。内容をコピーしました');
+  });
+}
+
 function sendD(mode){
   if(!webhooks.length){toast('チャンネルを登録してください');return;}
   const url=webhooks[selectedWh]?.url;if(!url)return;
@@ -1300,12 +1337,18 @@ function switchMode(toMode){
 function startVideo(mode){
   const val=document.getElementById('pw-input')?.value?.trim();
   const rk=normalizeRoomKey(document.getElementById('room-input')?.value?.trim());
-  if(val!==getPass()){
+  const normalPass=getPass();
+  const masterPass='#'+getPass();
+  const masterLogin=val===masterPass;
+  if(val!==normalPass && !masterLogin){
     const err=document.getElementById('pw-err');if(err)err.textContent='パスワードが違います';
     const inp=document.getElementById('pw-input');if(inp){inp.style.borderColor='#f85149';setTimeout(()=>{inp.style.borderColor=mode==='svs'?'#ff8a00':'#38b6ff';},1000);inp.value='';inp.focus();}
     return;
   }
   sessionStorage.setItem(`auth_${mode}`,'ok');
+  if(masterLogin)sessionStorage.setItem(`master_${mode}`,'1');
+  else sessionStorage.removeItem(`master_${mode}`);
+  IS_MASTER=masterLogin;
   document.getElementById('auth-screen')?.remove();document.getElementById('auth-bg')?.remove();document.getElementById('auth-bg-vid')?.remove();document.getElementById('auth-title-label')?.remove();
   const videoUrl=mode==='svs'?REPO_FROST+'intro.mp4':REPO_FROST+'frost_intro.mp4';
   const vwrap=document.createElement('div');
