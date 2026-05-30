@@ -194,6 +194,11 @@ const FS={
   tab:'battle',
   members:[],active:[],pet:{},petStart:{},enemies:[],now:Date.now(),
   baseId:null,  // 基準メンバーID（nullの場合は最短行軍が自動選択）
+  calcMode:'sync', // 'sync' or 'delay'
+  delaySource:'same', // 'same' or 'custom'
+  delayOrder:['A','B','C','D'],
+  delayGaps:[0,2,2,2],
+  delayAssign:{} // {memberId: '1'|'2'|'3'|'4'|'未'}
 };
 
 // ============================================================
@@ -354,6 +359,28 @@ function render(){
     ({battle:rFrostBattle,calc:rFrostCalc,copy:rFrostCopy,enemy:rFrostEnemy})[tab]?.(el);
   }
 }
+
+
+function renderStickyClock(label){
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const ss=String(now.getSeconds()).padStart(2,'0');
+  return `<div style="position:sticky;top:0;z-index:90;background:linear-gradient(180deg,rgba(13,24,41,.98),rgba(13,24,41,.92));border:1px solid var(--border2);border-radius:12px;padding:10px 12px;margin-bottom:10px;box-shadow:0 8px 20px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(8px)">
+    <div style="font-size:12px;color:var(--text2);font-weight:700">🕒 ${label}</div>
+    <div style="font-size:26px;line-height:1;font-weight:900;color:#f7d774;letter-spacing:1px;text-shadow:0 0 10px rgba(247,215,116,.25)" id="sticky-clock-time">${hh}:${mm}:${ss}</div>
+  </div>`;
+}
+function renderCalcModeSwitch(){
+  return `<div class="card" style="margin-bottom:10px">
+    <div class="sec">霜竜 計算モード</div>
+    <div class="seg2" style="margin-bottom:0">
+      <div class="sbtn ${FS.calcMode==='sync'?'on-blue':''}" onclick="fSetCalcMode('sync')">同着モード</div>
+      <div class="sbtn ${FS.calcMode==='delay'?'on-blue':''}" onclick="fSetCalcMode('delay')">ディレイモード</div>
+    </div>
+  </div>`;
+}
+function fSetCalcMode(v){FS.calcMode=v;render();}
 
 // ============================================================
 // SVS タブ実装
@@ -553,7 +580,7 @@ function rSvsCalc(el){
   const ac=SS.members.filter(m=>SS.active.includes(m.id));
   const all=sCalcHits(ac);
   const teams=[...new Set(ac.map(m=>m.team))].sort();
-  el.innerHTML=`
+  el.innerHTML=renderStickyClock('SVS 同着計算')+`
 <div class="card">
   <div class="sec">全体同時着弾</div>
   ${all.length?`
@@ -771,7 +798,128 @@ function rFrostBattle(el){
 </div>`;
 }
 
+
 function rFrostCalc(el){
+  if(FS.calcMode==='delay'){
+    el.innerHTML=renderStickyClock('霜竜 ディレイ計算')+renderCalcModeSwitch()+renderFrostDelayCalc();
+    return;
+  }
+  rFrostSyncCalc(el);
+  el.insertAdjacentHTML('afterbegin',renderStickyClock('霜竜 同着計算')+renderCalcModeSwitch());
+}
+function fDelayHitLabel(i){return ['初撃','2発目','3発目','4発目'][i]||`${i+1}発目`;}
+function fDelayTeamColor(team){return tc(team);}
+function fDelayGetMembersForSlot(slotIndex){
+  const ac=FS.members.filter(m=>FS.active.includes(m.id)&&fGetMarch(m.id));
+  if(FS.delaySource==='custom'){
+    const key=String(slotIndex+1);
+    return ac.filter(m=>String(FS.delayAssign[m.id]||'未')===key);
+  }
+  const team=FS.delayOrder[slotIndex];
+  return ac.filter(m=>m.team===team);
+}
+function fDelayOffsets(){
+  const gaps=FS.delayGaps||[0,2,2,2];
+  const offsets=[0,0,0,0];
+  for(let i=1;i<4;i++)offsets[i]=offsets[i-1]+(parseInt(gaps[i]||0)||0);
+  return offsets;
+}
+function fDelayRows(){
+  const offsets=fDelayOffsets();
+  const raw=[];
+  for(let i=0;i<4;i++){
+    const members=fDelayGetMembersForSlot(i);
+    members.forEach(m=>{
+      const march=fGetMarch(m.id);
+      if(march)raw.push({slot:i,offset:offsets[i],gap:i===0?0:(parseInt((FS.delayGaps||[])[i]||0)||0),member:m,march,team:FS.delaySource==='same'?FS.delayOrder[i]:(m.team||'未')});
+    });
+  }
+  if(!raw.length)return[];
+  const minKey=Math.min(...raw.map(r=>r.march-r.offset));
+  return raw.map(r=>({...r,count:(r.march-r.offset)-minKey})).sort((a,b)=>a.slot-b.slot||b.count-a.count||b.march-a.march);
+}
+function fSetDelaySource(v){FS.delaySource=v;render();}
+function fSetDelayOrder(idx,val){FS.delayOrder[idx]=val;render();}
+function fSetDelayGap(idx,val){FS.delayGaps[idx]=Math.max(0,Math.min(99,parseInt(val||0)||0));render();}
+function fSetDelayAssign(id,val){FS.delayAssign[id]=val;render();}
+function renderFrostDelayCalc(){
+  const ac=FS.members.filter(m=>FS.active.includes(m.id));
+  const rows=fDelayRows();
+  const teams=['A','B','C','D'];
+  const copyText=buildFrostDelayCopyText(rows);
+  return `<div class="card">
+    <div class="sec">ディレイチーム設定</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">チーム着弾順を基準に、各メンバーの行軍秒からVC用の出発カウントを逆算します。</div>
+    <div class="seg2" style="margin-bottom:10px">
+      <div class="sbtn ${FS.delaySource==='same'?'on-blue':''}" onclick="fSetDelaySource('same')">同着チームを使用</div>
+      <div class="sbtn ${FS.delaySource==='custom'?'on-blue':''}" onclick="fSetDelaySource('custom')">ディレイ専用チーム</div>
+    </div>
+    ${FS.delaySource==='same'?renderDelaySameTeamSettings(teams):renderDelayCustomTeamSettings(ac)}
+  </div>
+  <div class="card">
+    <div class="sec">ディレイ集計 / VCカウント</div>
+    ${rows.length?renderDelayResult(rows):'<div class="empty">参戦メンバーと行軍秒を設定してください</div>'}
+    ${rows.length?`<div class="cpbox" id="cp-delay" style="margin-top:10px">${copyText}</div><button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-delay').textContent)">ディレイ結果コピー</button>`:''}
+  </div>`;
+}
+function renderDelaySameTeamSettings(teams){
+  return `<div style="display:grid;gap:8px">
+    ${[0,1,2,3].map(i=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:${i===0?'0':'8px'}">
+        <div style="width:58px;font-size:12px;font-weight:900;color:${i===0?'var(--green)':'var(--orange)'}">${fDelayHitLabel(i)}</div>
+        <select class="inp fl1" style="height:34px" onchange="fSetDelayOrder(${i},this.value)">
+          ${teams.map(t=>`<option value="${t}" ${FS.delayOrder[i]===t?'selected':''}>${t}チーム</option>`).join('')}
+        </select>
+        ${i===0?'':`<div style="width:42px;text-align:center;color:var(--text2);font-size:12px">+秒</div><input class="inp-num" style="width:58px;height:34px" type="number" min="0" max="99" value="${FS.delayGaps[i]||0}" onchange="fSetDelayGap(${i},this.value)">`}
+      </div>
+      <div style="font-size:11px;color:var(--text3);padding-left:66px">${fDelayGetMembersForSlot(i).map(m=>m.name).join('、')||'該当メンバーなし'}</div>
+    </div>`).join('')}
+  </div>`;
+}
+function renderDelayCustomTeamSettings(ac){
+  return `<div style="display:grid;gap:8px">
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+      <div style="font-size:12px;color:var(--text2);font-weight:800;margin-bottom:8px">発目ごとの間隔</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        ${[1,2,3].map(i=>`<div><div style="font-size:10px;color:var(--text3);margin-bottom:3px">${fDelayHitLabel(i)} +秒</div><input class="inp-num" style="width:100%;height:34px" type="number" min="0" max="99" value="${FS.delayGaps[i]||0}" onchange="fSetDelayGap(${i},this.value)"></div>`).join('')}
+      </div>
+    </div>
+    ${ac.length?ac.map(m=>`<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+      <div style="flex:1"><div style="font-size:14px;font-weight:700">${m.name}</div><div style="font-size:11px;color:var(--text3)">${m.team}チーム / 行軍 ${fGetMarch(m.id)||'-'}秒</div></div>
+      <select class="inp" style="width:110px;height:34px" onchange="fSetDelayAssign(${m.id},this.value)">
+        <option value="未" ${!FS.delayAssign[m.id]||FS.delayAssign[m.id]==='未'?'selected':''}>未設定</option>
+        ${[0,1,2,3].map(i=>`<option value="${i+1}" ${String(FS.delayAssign[m.id])===String(i+1)?'selected':''}>${fDelayHitLabel(i)}</option>`).join('')}
+      </select>
+    </div>`).join(''):'<div class="empty">参戦メンバーがいません</div>'}
+  </div>`;
+}
+function renderDelayResult(rows){
+  const by=[0,1,2,3].map(i=>rows.filter(r=>r.slot===i));
+  return `<div style="display:grid;gap:10px">
+    ${by.map((list,i)=>list.length?`<div style="background:var(--bg3);border-left:4px solid ${i===0?'var(--green)':'var(--orange)'};border-radius:10px;padding:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:900;color:${i===0?'var(--green)':'var(--orange)'}">【${fDelayHitLabel(i)}】${i===0?'':` +${list[0].gap}秒`}</div>
+        <div style="font-size:11px;color:var(--text3)">累計 +${list[0].offset}秒</div>
+      </div>
+      ${list.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-top:1px solid var(--border)">
+        <div style="flex:1"><span class="chip" data-t="${r.team}">${r.team}</span> <span style="font-size:14px;font-weight:700;margin-left:6px">${r.member.name}</span><div style="font-size:11px;color:var(--text3);margin-top:3px">行軍 ${r.march}秒</div></div>
+        <div style="text-align:right"><div style="font-size:30px;font-weight:900;color:var(--text);line-height:1">${r.count}</div><div style="font-size:10px;color:var(--text3)">カウント</div></div>
+      </div>`).join('')}
+    </div>`:'').join('')}
+  </div>`;
+}
+function buildFrostDelayCopyText(rows){
+  if(!rows.length)return'';
+  const out=['【霜竜ディレイ】'];
+  for(let i=0;i<4;i++){
+    const list=rows.filter(r=>r.slot===i);
+    if(!list.length)continue;
+    out.push(`【${fDelayHitLabel(i)}】${i===0?'':`+${list[0].gap}秒`}`);
+    list.forEach(r=>out.push(`${r.member.name} ${r.count}`));
+  }
+  return out.join('\n');
+}
+function rFrostSyncCalc(el){
   const ac=FS.members.filter(m=>FS.active.includes(m.id));
   const all=fCalcHits(ac);const teams=[...new Set(ac.map(m=>m.team))].sort();
   const wm=ac.map(m=>({...m,march:fGetMarch(m.id)})).filter(m=>m.march!==null&&m.march>0);
@@ -1069,7 +1217,7 @@ function getStatePayload(){
       members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
     },
     frost:{
-      members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId
+      members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId,calcMode:FS.calcMode,delaySource:FS.delaySource,delayOrder:FS.delayOrder,delayGaps:FS.delayGaps,delayAssign:FS.delayAssign
     }
   };
 }
@@ -1085,6 +1233,8 @@ function applyStatePayload(d){
   if(f.members)FS.members=f.members;if(f.active)FS.active=f.active;
   if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;
   if(f.baseId!==undefined)FS.baseId=f.baseId;
+  if(f.calcMode)FS.calcMode=f.calcMode;if(f.delaySource)FS.delaySource=f.delaySource;
+  if(f.delayOrder)FS.delayOrder=f.delayOrder;if(f.delayGaps)FS.delayGaps=f.delayGaps;if(f.delayAssign)FS.delayAssign=f.delayAssign;
 }
 function saveLocal(){
   try{localStorage.setItem('app_svs',JSON.stringify({
@@ -1092,7 +1242,7 @@ function saveLocal(){
     members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
   }));
   localStorage.setItem('app_frost',JSON.stringify({
-    members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId
+    members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId,calcMode:FS.calcMode,delaySource:FS.delaySource,delayOrder:FS.delayOrder,delayGaps:FS.delayGaps,delayAssign:FS.delayAssign
   }));}catch(e){}
 }
 function saveAll(){
@@ -1119,6 +1269,8 @@ function loadAll(){
     const f=JSON.parse(localStorage.getItem('app_frost')||'{}');
     if(f.members)FS.members=f.members;if(f.active)FS.active=f.active;
     if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;if(f.baseId!==undefined)FS.baseId=f.baseId;
+  if(f.calcMode)FS.calcMode=f.calcMode;if(f.delaySource)FS.delaySource=f.delaySource;
+  if(f.delayOrder)FS.delayOrder=f.delayOrder;if(f.delayGaps)FS.delayGaps=f.delayGaps;if(f.delayAssign)FS.delayAssign=f.delayAssign;
   }catch(e){}
 }
 function normalizeRoomKey(v){return String(v||'').replace(/\D/g,'').slice(0,4);}
@@ -1402,6 +1554,11 @@ function startVideo(mode){
 // ============================================================
 const _r=render;
 window.render=function(){_r();saveAll();};
+
+setInterval(()=>{
+  const e=document.getElementById('sticky-clock-time');
+  if(e){const n=new Date();e.textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;}
+},1000);
 
 setInterval(()=>{
   SS.now=Date.now();FS.now=Date.now();
