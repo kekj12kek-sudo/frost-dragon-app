@@ -924,7 +924,7 @@ function renderDelayResult(rows){
   </div>`;
 }
 function renderDelayMixedList(rows){
-  const mixed=[...rows].sort((a,b)=>a.slot-b.slot||b.count-a.count||a.member.name.localeCompare(b.member.name,'ja'));
+  const mixed=[...rows].sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
   return `<div style="background:rgba(6,13,26,.58);border:1px solid rgba(227,179,65,.28);border-radius:10px;padding:10px;margin-top:10px">
     <div style="font-size:12px;font-weight:900;color:#f7d774;margin-bottom:6px">ディレイVC読み上げ一覧</div>
     ${mixed.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-top:1px solid var(--border)">
@@ -960,7 +960,7 @@ function buildFrostDelayCountCopyText(rows, slots=null){
   if(!rows.length)return'';
   let target=[...rows];
   if(slots)target=target.filter(r=>slots.includes(r.slot));
-  target.sort((a,b)=>a.slot-b.slot||b.count-a.count||a.member.name.localeCompare(b.member.name,'ja'));
+  target.sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
   return target.map(r=>`${r.member.name} ${r.count}`).join('\n');
 }
 function buildFrostDelayMixedCopyText(rows){
