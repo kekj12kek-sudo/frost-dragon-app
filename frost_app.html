@@ -913,7 +913,7 @@ function renderDelayResult(rows){
   return `<div style="display:grid;gap:10px">
     ${by.map((list,i)=>list.length?`<div style="background:var(--bg3);border-left:4px solid ${i===0?'var(--green)':'var(--orange)'};border-radius:10px;padding:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div style="font-size:13px;font-weight:900;color:${i===0?'var(--green)':'var(--orange)'}">【${fDelayHitLabel(i)}】${i===0?'':` +${list[0].gap}秒`}</div>
+        <div style="font-size:13px;font-weight:900;color:${i===0?'var(--green)':'var(--orange)'};line-height:1.45">【${fDelayHitLabel(i)}】${i===0?'':`<div style="font-size:11px;color:var(--text2);font-weight:800;margin-top:2px">前着から+${list[0].gap}秒差</div>`}</div>
         <div style="font-size:11px;color:var(--text3)">累計 +${list[0].offset}秒</div>
       </div>
       ${list.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-top:1px solid var(--border)">
@@ -924,11 +924,11 @@ function renderDelayResult(rows){
   </div>`;
 }
 function renderDelayMixedList(rows){
-  const mixed=[...rows].sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
+  const mixed=[...rows].sort((a,b)=>a.slot-b.slot||b.count-a.count||a.member.name.localeCompare(b.member.name,'ja'));
   return `<div style="background:rgba(6,13,26,.58);border:1px solid rgba(227,179,65,.28);border-radius:10px;padding:10px;margin-top:10px">
     <div style="font-size:12px;font-weight:900;color:#f7d774;margin-bottom:6px">ディレイVC読み上げ一覧</div>
     ${mixed.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-top:1px solid var(--border)">
-      <div style="flex:1"><span style="font-size:12px;color:#f7d774;font-weight:900">【${fDelayHitLabel(r.slot)}】</span><span class="chip" data-t="${r.team}" style="margin-left:6px">${r.team}</span><span style="font-size:14px;font-weight:700;margin-left:6px">${r.member.name}</span></div>
+      <div style="flex:1"><span style="font-size:12px;color:#f7d774;font-weight:900">【${fDelayHitLabel(r.slot)}】</span><span style="font-size:14px;font-weight:700;margin-left:6px">${r.member.name}</span></div>
       <div style="font-size:26px;font-weight:900;color:var(--text);line-height:1">${r.count}<span style="font-size:10px;color:var(--text3);margin-left:3px">count</span></div>
     </div>`).join('')}
   </div>`;
@@ -938,8 +938,8 @@ function renderDelayCopyArea(rows){
   const text=mode==='mixed'?buildFrostDelayMixedCopyText(rows):buildFrostDelayGroupCopyText(rows);
   return `<div style="margin-top:10px">
     <div class="seg2" style="margin-bottom:8px">
-      <div class="sbtn ${mode==='group'?'on-blue':''}" onclick="fSetDelayCopyMode('group')">発目別コピー</div>
-      <div class="sbtn ${mode==='mixed'?'on-blue':''}" onclick="fSetDelayCopyMode('mixed')">混同コピー</div>
+      <div class="sbtn ${mode==='group'?'on-blue':''}" onclick="fSetDelayCopyMode('group')">チーム詳細コピー</div>
+      <div class="sbtn ${mode==='mixed'?'on-blue':''}" onclick="fSetDelayCopyMode('mixed')">ディレイ集結カウント</div>
     </div>
     <div class="cpbox" id="cp-delay">${text}</div>
     <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-delay').textContent)">ディレイ結果コピー</button>
@@ -947,21 +947,24 @@ function renderDelayCopyArea(rows){
 }
 function buildFrostDelayGroupCopyText(rows){
   if(!rows.length)return'';
-  const out=['【霜竜ディレイ】'];
+  const out=['【ディレイチーム詳細】'];
   for(let i=0;i<4;i++){
-    const list=rows.filter(r=>r.slot===i);
+    const list=rows.filter(r=>r.slot===i).sort((a,b)=>b.count-a.count||a.member.name.localeCompare(b.member.name,'ja'));
     if(!list.length)continue;
-    out.push(`【${fDelayHitLabel(i)}】${i===0?'':`+${list[0].gap}秒`}`);
-    list.forEach(r=>out.push(`${r.member.name} ${r.count}`));
+    out.push(i===0?`【${fDelayHitLabel(i)}】`:`【${fDelayHitLabel(i)}】前着から+${list[0].gap}秒差`);
+    list.forEach(r=>out.push(`${r.member.name}`));
   }
   return out.join('\n');
 }
-function buildFrostDelayMixedCopyText(rows){
+function buildFrostDelayCountCopyText(rows, slots=null){
   if(!rows.length)return'';
-  const out=['【霜竜ディレイVC読み上げ】'];
-  const mixed=[...rows].sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
-  mixed.forEach(r=>out.push(`【${fDelayHitLabel(r.slot)}】${r.member.name} ${r.count}`));
-  return out.join('\n');
+  let target=[...rows];
+  if(slots)target=target.filter(r=>slots.includes(r.slot));
+  target.sort((a,b)=>a.slot-b.slot||b.count-a.count||a.member.name.localeCompare(b.member.name,'ja'));
+  return target.map(r=>`${r.member.name} ${r.count}`).join('\n');
+}
+function buildFrostDelayMixedCopyText(rows){
+  return buildFrostDelayCountCopyText(rows);
 }
 function buildFrostDelayCopyText(rows){
   return (FS.delayCopyMode||'group')==='mixed'?buildFrostDelayMixedCopyText(rows):buildFrostDelayGroupCopyText(rows);
@@ -1066,9 +1069,19 @@ function renderFrostDelayCopyPageCard(){
   const mode=FS.delayCopyMode||'group';
   const text=mode==='mixed'?buildFrostDelayMixedCopyText(rows):buildFrostDelayGroupCopyText(rows);
   return `<div class="card" style="margin-top:10px;border-color:rgba(227,179,65,.5);background:linear-gradient(180deg,rgba(58,42,10,.28),rgba(13,24,41,.98));"><div class="sec">ディレイ結果コピー</div>
-    <div class="seg2" style="margin-bottom:8px"><div class="sbtn ${mode==='group'?'on-blue':''}" onclick="fSetDelayCopyMode('group')">発目別コピー</div><div class="sbtn ${mode==='mixed'?'on-blue':''}" onclick="fSetDelayCopyMode('mixed')">VC読み上げコピー</div></div>
+    <div class="seg2" style="margin-bottom:8px"><div class="sbtn ${mode==='group'?'on-blue':''}" onclick="fSetDelayCopyMode('group')">チーム詳細コピー</div><div class="sbtn ${mode==='mixed'?'on-blue':''}" onclick="fSetDelayCopyMode('mixed')">ディレイ集結カウント</div></div>
     <div class="cpbox" id="cp-delay">${text}</div>
     <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-delay').textContent)">ディレイ結果コピー</button>
+    ${IS_MASTER?renderDelayMasterSendOptions(rows):''}
+  </div>`;
+}
+function renderDelayMasterSendOptions(rows){
+  return `<div style="margin-top:10px;background:rgba(247,215,116,.08);border:1px solid rgba(247,215,116,.35);border-radius:10px;padding:10px">
+    <div style="font-size:12px;font-weight:900;color:#f7d774;margin-bottom:8px">👑 ディレイゲーム送信</div>
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:var(--text)"><input type="checkbox" id="delay-send-detail" checked> チーム詳細を送る</label>
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--text)"><input type="checkbox" id="delay-send-count" checked> ディレイ集結カウントを送る</label>
+    <button class="btn" id="game-send-delay" style="background:linear-gradient(180deg,#d97706,#92400e);border-color:#f59e0b;color:#fff;font-weight:900" onclick="sendDelayGameChat()">👑 ディレイ送信</button>
+    <div style="font-size:11px;color:var(--text3);line-height:1.5;margin-top:8px">送信順：チーム詳細 → 初撃・2発目カウント → 3発目・4発目カウント</div>
   </div>`;
 }
 
@@ -1141,6 +1154,10 @@ function buildGameChatText(kind){
   if(kind==='all')return getCopyBoxText('cp-all');
   if(kind==='chunk0')return getCopyBoxText('cp-c0');
   if(kind==='chunk1')return getCopyBoxText('cp-c1');
+  if(kind==='delayDetail')return buildFrostDelayGroupCopyText(fDelayRows());
+  if(kind==='delayCount01')return buildFrostDelayCountCopyText(fDelayRows(),[0,1]);
+  if(kind==='delayCount23')return buildFrostDelayCountCopyText(fDelayRows(),[2,3]);
+  if(kind==='delayCountAll')return buildFrostDelayCountCopyText(fDelayRows());
   return'';
 }
 function renderGameChatUI(mode){
@@ -1157,7 +1174,7 @@ function renderGameChatUI(mode){
   </div>`;
 }
 function setGameChatButtonsDisabled(disabled){
-  ['game-send-all','game-send-c0','game-send-c1'].forEach(id=>{
+  ['game-send-all','game-send-c0','game-send-c1','game-send-delay'].forEach(id=>{
     const b=document.getElementById(id);
     if(!b)return;
     b.disabled=disabled;
@@ -1165,16 +1182,20 @@ function setGameChatButtonsDisabled(disabled){
     b.style.pointerEvents=disabled?'none':'auto';
   });
 }
+function postGameChatText(mode,kind,label,txt){
+  return fetch('http://127.0.0.1:1648/send',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mode,kind,label,text:txt,source:'web-totsugekikun',ts:Date.now()})
+  });
+}
+function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 function sendGameChat(mode,kind,label){
   const txt=buildGameChatText(kind).trim();
   if(!txt){toast(`${label}の送信内容がありません`);return;}
   setGameChatButtonsDisabled(true);
   toast(`${label} 送信中...`);
-  fetch('http://127.0.0.1:1648/send',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({mode,kind,label,text:txt,source:'web-totsugekikun',ts:Date.now()})
-  }).then(r=>{
+  postGameChatText(mode,kind,label,txt).then(r=>{
     if(r.ok)toast(`${label} 送信指示を送りました`);
     else throw new Error('bad response');
   }).catch(()=>{
@@ -1183,6 +1204,38 @@ function sendGameChat(mode,kind,label){
   }).finally(()=>{
     setTimeout(()=>setGameChatButtonsDisabled(false),5000);
   });
+}
+async function sendDelayGameChat(){
+  const sendDetail=document.getElementById('delay-send-detail')?.checked;
+  const sendCount=document.getElementById('delay-send-count')?.checked;
+  const jobs=[];
+  if(sendDetail){
+    const t=buildGameChatText('delayDetail').trim();
+    if(t)jobs.push({kind:'delayDetail',label:'ディレイチーム詳細',text:t});
+  }
+  if(sendCount){
+    const t1=buildGameChatText('delayCount01').trim();
+    const t2=buildGameChatText('delayCount23').trim();
+    if(t1)jobs.push({kind:'delayCount01',label:'ディレイ集結カウント前半',text:t1});
+    if(t2)jobs.push({kind:'delayCount23',label:'ディレイ集結カウント後半',text:t2});
+  }
+  if(!jobs.length){toast('ディレイ送信内容がありません');return;}
+  setGameChatButtonsDisabled(true);
+  try{
+    for(let i=0;i<jobs.length;i++){
+      const j=jobs[i];
+      toast(`${j.label} 送信中...`);
+      const r=await postGameChatText('frost',j.kind,j.label,j.text);
+      if(!r.ok)throw new Error('bad response');
+      if(i<jobs.length-1)await sleep(5200);
+    }
+    toast('ディレイ送信完了');
+  }catch(e){
+    navigator.clipboard.writeText(jobs.map(j=>j.text).join('\n\n')).catch(()=>{});
+    toast('Windowsツール未起動。内容をコピーしました');
+  }finally{
+    setTimeout(()=>setGameChatButtonsDisabled(false),5000);
+  }
 }
 
 function sendD(mode){
