@@ -198,7 +198,8 @@ const FS={
   delaySource:'same', // 'same' or 'custom'
   delayOrder:['A','B','C','D'],
   delayGaps:[0,2,2,2],
-  delayAssign:{} // {memberId: '1'|'2'|'3'|'4'|'未'}
+  delayAssign:{}, // {memberId: '1'|'2'|'3'|'4'|'未'}
+  delayCopyMode:'group' // 'group' or 'mixed'
 };
 
 // ============================================================
@@ -372,11 +373,15 @@ function renderStickyClock(label){
   </div>`;
 }
 function renderCalcModeSwitch(){
-  return `<div class="card" style="margin-bottom:10px">
+  const isDelay=FS.calcMode==='delay';
+  const boxStyle=isDelay
+    ? 'margin-bottom:10px;border-color:rgba(227,179,65,.65);background:linear-gradient(180deg,rgba(58,42,10,.78),rgba(13,24,41,.96));box-shadow:0 0 18px rgba(227,179,65,.12)'
+    : 'margin-bottom:10px';
+  return `<div class="card" style="${boxStyle}">
     <div class="sec">霜竜 計算モード</div>
     <div class="seg2" style="margin-bottom:0">
       <div class="sbtn ${FS.calcMode==='sync'?'on-blue':''}" onclick="fSetCalcMode('sync')">同着モード</div>
-      <div class="sbtn ${FS.calcMode==='delay'?'on-blue':''}" onclick="fSetCalcMode('delay')">ディレイモード</div>
+      <div class="sbtn ${FS.calcMode==='delay'?'on-blue':''}" style="${isDelay?'background:#3a2a0a;border-color:#e3b341;color:#f7d774':''}" onclick="fSetCalcMode('delay')">ディレイモード</div>
     </div>
   </div>`;
 }
@@ -842,12 +847,13 @@ function fSetDelaySource(v){FS.delaySource=v;render();}
 function fSetDelayOrder(idx,val){FS.delayOrder[idx]=val;render();}
 function fSetDelayGap(idx,val){FS.delayGaps[idx]=Math.max(0,Math.min(99,parseInt(val||0)||0));render();}
 function fSetDelayAssign(id,val){FS.delayAssign[id]=val;render();}
+function fSetDelayCopyMode(v){FS.delayCopyMode=v;render();}
 function renderFrostDelayCalc(){
   const ac=FS.members.filter(m=>FS.active.includes(m.id));
   const rows=fDelayRows();
   const teams=['A','B','C','D'];
   const copyText=buildFrostDelayCopyText(rows);
-  return `<div class="card">
+  return `<div class="card" style="border-color:rgba(227,179,65,.45);background:linear-gradient(180deg,rgba(58,42,10,.42),rgba(13,24,41,.98));">
     <div class="sec">ディレイチーム設定</div>
     <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">チーム着弾順を基準に、各メンバーの行軍秒からVC用の出発カウントを逆算します。</div>
     <div class="seg2" style="margin-bottom:10px">
@@ -856,10 +862,11 @@ function renderFrostDelayCalc(){
     </div>
     ${FS.delaySource==='same'?renderDelaySameTeamSettings(teams):renderDelayCustomTeamSettings(ac)}
   </div>
-  <div class="card">
+  <div class="card" style="border-color:rgba(227,179,65,.45);background:linear-gradient(180deg,rgba(58,42,10,.34),rgba(13,24,41,.98));">
     <div class="sec">ディレイ集計 / VCカウント</div>
     ${rows.length?renderDelayResult(rows):'<div class="empty">参戦メンバーと行軍秒を設定してください</div>'}
-    ${rows.length?`<div class="cpbox" id="cp-delay" style="margin-top:10px">${copyText}</div><button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-delay').textContent)">ディレイ結果コピー</button>`:''}
+    ${rows.length?renderDelayMixedList(rows):''}
+    ${rows.length?renderDelayCopyArea(rows):''}
   </div>`;
 }
 function renderDelaySameTeamSettings(teams){
@@ -908,7 +915,29 @@ function renderDelayResult(rows){
     </div>`:'').join('')}
   </div>`;
 }
-function buildFrostDelayCopyText(rows){
+function renderDelayMixedList(rows){
+  const mixed=[...rows].sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
+  return `<div style="background:rgba(6,13,26,.58);border:1px solid rgba(227,179,65,.28);border-radius:10px;padding:10px;margin-top:10px">
+    <div style="font-size:12px;font-weight:900;color:#f7d774;margin-bottom:6px">ディレイ混同一覧</div>
+    ${mixed.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-top:1px solid var(--border)">
+      <div style="flex:1"><span style="font-size:12px;color:#f7d774;font-weight:900">【${fDelayHitLabel(r.slot)}】</span><span class="chip" data-t="${r.team}" style="margin-left:6px">${r.team}</span><span style="font-size:14px;font-weight:700;margin-left:6px">${r.member.name}</span></div>
+      <div style="font-size:26px;font-weight:900;color:var(--text);line-height:1">${r.count}<span style="font-size:10px;color:var(--text3);margin-left:3px">count</span></div>
+    </div>`).join('')}
+  </div>`;
+}
+function renderDelayCopyArea(rows){
+  const mode=FS.delayCopyMode||'group';
+  const text=mode==='mixed'?buildFrostDelayMixedCopyText(rows):buildFrostDelayGroupCopyText(rows);
+  return `<div style="margin-top:10px">
+    <div class="seg2" style="margin-bottom:8px">
+      <div class="sbtn ${mode==='group'?'on-blue':''}" onclick="fSetDelayCopyMode('group')">発目別コピー</div>
+      <div class="sbtn ${mode==='mixed'?'on-blue':''}" onclick="fSetDelayCopyMode('mixed')">混同コピー</div>
+    </div>
+    <div class="cpbox" id="cp-delay">${text}</div>
+    <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-delay').textContent)">ディレイ結果コピー</button>
+  </div>`;
+}
+function buildFrostDelayGroupCopyText(rows){
   if(!rows.length)return'';
   const out=['【霜竜ディレイ】'];
   for(let i=0;i<4;i++){
@@ -918,6 +947,16 @@ function buildFrostDelayCopyText(rows){
     list.forEach(r=>out.push(`${r.member.name} ${r.count}`));
   }
   return out.join('\n');
+}
+function buildFrostDelayMixedCopyText(rows){
+  if(!rows.length)return'';
+  const out=['【霜竜ディレイ混同】'];
+  const mixed=[...rows].sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
+  mixed.forEach(r=>out.push(`【${fDelayHitLabel(r.slot)}】${r.member.name} ${r.count}`));
+  return out.join('\n');
+}
+function buildFrostDelayCopyText(rows){
+  return (FS.delayCopyMode||'group')==='mixed'?buildFrostDelayMixedCopyText(rows):buildFrostDelayGroupCopyText(rows);
 }
 function rFrostSyncCalc(el){
   const ac=FS.members.filter(m=>FS.active.includes(m.id));
@@ -1217,7 +1256,7 @@ function getStatePayload(){
       members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
     },
     frost:{
-      members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId,calcMode:FS.calcMode,delaySource:FS.delaySource,delayOrder:FS.delayOrder,delayGaps:FS.delayGaps,delayAssign:FS.delayAssign
+      members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId,calcMode:FS.calcMode,delaySource:FS.delaySource,delayOrder:FS.delayOrder,delayGaps:FS.delayGaps,delayAssign:FS.delayAssign,delayCopyMode:FS.delayCopyMode
     }
   };
 }
@@ -1234,7 +1273,7 @@ function applyStatePayload(d){
   if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;
   if(f.baseId!==undefined)FS.baseId=f.baseId;
   if(f.calcMode)FS.calcMode=f.calcMode;if(f.delaySource)FS.delaySource=f.delaySource;
-  if(f.delayOrder)FS.delayOrder=f.delayOrder;if(f.delayGaps)FS.delayGaps=f.delayGaps;if(f.delayAssign)FS.delayAssign=f.delayAssign;
+  if(f.delayOrder)FS.delayOrder=f.delayOrder;if(f.delayGaps)FS.delayGaps=f.delayGaps;if(f.delayAssign)FS.delayAssign=f.delayAssign;if(f.delayCopyMode)FS.delayCopyMode=f.delayCopyMode;
 }
 function saveLocal(){
   try{localStorage.setItem('app_svs',JSON.stringify({
@@ -1242,7 +1281,7 @@ function saveLocal(){
     members:SS.members,cityAssign:SS.cityAssign,active:SS.active,pet:SS.pet,petStart:SS.petStart,enemies:SS.enemies,adjust:SS.adjust
   }));
   localStorage.setItem('app_frost',JSON.stringify({
-    members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId,calcMode:FS.calcMode,delaySource:FS.delaySource,delayOrder:FS.delayOrder,delayGaps:FS.delayGaps,delayAssign:FS.delayAssign
+    members:FS.members,active:FS.active,pet:FS.pet,petStart:FS.petStart,enemies:FS.enemies,baseId:FS.baseId,calcMode:FS.calcMode,delaySource:FS.delaySource,delayOrder:FS.delayOrder,delayGaps:FS.delayGaps,delayAssign:FS.delayAssign,delayCopyMode:FS.delayCopyMode
   }));}catch(e){}
 }
 function saveAll(){
@@ -1270,7 +1309,7 @@ function loadAll(){
     if(f.members)FS.members=f.members;if(f.active)FS.active=f.active;
     if(f.pet)FS.pet=f.pet;if(f.petStart)FS.petStart=f.petStart;if(f.enemies)FS.enemies=f.enemies;if(f.baseId!==undefined)FS.baseId=f.baseId;
   if(f.calcMode)FS.calcMode=f.calcMode;if(f.delaySource)FS.delaySource=f.delaySource;
-  if(f.delayOrder)FS.delayOrder=f.delayOrder;if(f.delayGaps)FS.delayGaps=f.delayGaps;if(f.delayAssign)FS.delayAssign=f.delayAssign;
+  if(f.delayOrder)FS.delayOrder=f.delayOrder;if(f.delayGaps)FS.delayGaps=f.delayGaps;if(f.delayAssign)FS.delayAssign=f.delayAssign;if(f.delayCopyMode)FS.delayCopyMode=f.delayCopyMode;
   }catch(e){}
 }
 function normalizeRoomKey(v){return String(v||'').replace(/\D/g,'').slice(0,4);}
