@@ -350,28 +350,28 @@ function render(){
   });
   const tab=MODE==='svs'?SS.tab:FS.tab;
   const el=document.getElementById('content');
+  const clk=formatClock();
   if(MODE==='svs'){
     const hdrInfo=document.getElementById('hdr-info');
-    hdrInfo.textContent=`${sFactionLabel()}\n割当${Object.keys(SS.cityAssign).length}/${sTotalCities()}${IS_MASTER?'\n👑 MASTER':''}`;
+    hdrInfo.innerHTML=`<div>${sFactionLabel()}</div><div>割当${Object.keys(SS.cityAssign).length}/${sTotalCities()}${IS_MASTER?' / 👑 MASTER':''}</div><div id="hdr-clock" style="font-size:12px;font-weight:900;color:#f7d774;letter-spacing:.5px;margin-top:2px">🕒 ${clk}</div>`;
     ({setup:rSvsSetup,battle:rSvsBattle,calc:rSvsCalc,copy:rSvsCopy,enemy:rSvsEnemy})[tab]?.(el);
   } else {
     const ac=FS.members.filter(m=>FS.active.includes(m.id));
-    document.getElementById('hdr-info').textContent=`参戦: ${ac.length}名${IS_MASTER?'\n👑 MASTER':''}`;
+    document.getElementById('hdr-info').innerHTML=`<div>参戦: ${ac.length}名${IS_MASTER?' / 👑 MASTER':''}</div><div id="hdr-clock" style="font-size:12px;font-weight:900;color:#f7d774;letter-spacing:.5px;margin-top:2px">🕒 ${clk}</div>`;
     ({battle:rFrostBattle,calc:rFrostCalc,copy:rFrostCopy,enemy:rFrostEnemy})[tab]?.(el);
   }
 }
 
 
-function renderStickyClock(label){
+function formatClock(){
   const now=new Date();
   const hh=String(now.getHours()).padStart(2,'0');
   const mm=String(now.getMinutes()).padStart(2,'0');
   const ss=String(now.getSeconds()).padStart(2,'0');
-  return `<div style="position:sticky;top:0;z-index:90;background:linear-gradient(180deg,rgba(13,24,41,.98),rgba(13,24,41,.92));border:1px solid var(--border2);border-radius:12px;padding:10px 12px;margin-bottom:10px;box-shadow:0 8px 20px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(8px)">
-    <div style="font-size:12px;color:var(--text2);font-weight:700">🕒 ${label}</div>
-    <div style="font-size:26px;line-height:1;font-weight:900;color:#f7d774;letter-spacing:1px;text-shadow:0 0 10px rgba(247,215,116,.25)" id="sticky-clock-time">${hh}:${mm}:${ss}</div>
-  </div>`;
+  return `${hh}:${mm}:${ss}`;
 }
+function renderStickyClock(label){return '';}
+
 function renderCalcModeSwitch(){
   const isDelay=FS.calcMode==='delay';
   const boxStyle=isDelay
@@ -806,11 +806,11 @@ function rFrostBattle(el){
 
 function rFrostCalc(el){
   if(FS.calcMode==='delay'){
-    el.innerHTML=renderStickyClock('霜竜 ディレイ計算')+renderCalcModeSwitch()+renderFrostDelayCalc();
+    el.innerHTML=renderCalcModeSwitch()+renderFrostDelayCalc();
     return;
   }
   rFrostSyncCalc(el);
-  el.insertAdjacentHTML('afterbegin',renderStickyClock('霜竜 同着計算')+renderCalcModeSwitch());
+  el.insertAdjacentHTML('afterbegin',renderCalcModeSwitch());
 }
 function fDelayHitLabel(i){return ['初撃','2発目','3発目','4発目'][i]||`${i+1}発目`;}
 function fDelayTeamColor(team){return tc(team);}
@@ -846,6 +846,15 @@ function fDelayRows(){
 function fSetDelaySource(v){FS.delaySource=v;render();}
 function fSetDelayOrder(idx,val){FS.delayOrder[idx]=val;render();}
 function fSetDelayGap(idx,val){FS.delayGaps[idx]=Math.max(0,Math.min(99,parseInt(val||0)||0));render();}
+function fBumpDelayGap(idx,delta){
+  const cur=Math.max(0,Math.min(99,parseInt((FS.delayGaps||[])[idx]||0)||0));
+  FS.delayGaps[idx]=Math.max(0,Math.min(99,cur+delta));
+  render();
+}
+function renderDelayGapStepper(idx){
+  const val=Math.max(0,Math.min(99,parseInt((FS.delayGaps||[])[idx]||0)||0));
+  return `<div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><button class="btn btn-xs" style="width:34px;height:30px;padding:0" onclick="fBumpDelayGap(${idx},-1)">－</button><div style="min-width:42px;text-align:center;font-size:16px;font-weight:900;color:#f7d774">+${val}</div><button class="btn btn-xs" style="width:34px;height:30px;padding:0" onclick="fBumpDelayGap(${idx},1)">＋</button></div>`;
+}
 function fSetDelayAssign(id,val){FS.delayAssign[id]=val;render();}
 function fSetDelayCopyMode(v){FS.delayCopyMode=v;render();}
 function renderFrostDelayCalc(){
@@ -866,7 +875,6 @@ function renderFrostDelayCalc(){
     <div class="sec">ディレイ集計 / VCカウント</div>
     ${rows.length?renderDelayResult(rows):'<div class="empty">参戦メンバーと行軍秒を設定してください</div>'}
     ${rows.length?renderDelayMixedList(rows):''}
-    ${rows.length?renderDelayCopyArea(rows):''}
   </div>`;
 }
 function renderDelaySameTeamSettings(teams){
@@ -877,7 +885,7 @@ function renderDelaySameTeamSettings(teams){
         <select class="inp fl1" style="height:34px" onchange="fSetDelayOrder(${i},this.value)">
           ${teams.map(t=>`<option value="${t}" ${FS.delayOrder[i]===t?'selected':''}>${t}チーム</option>`).join('')}
         </select>
-        ${i===0?'':`<div style="width:42px;text-align:center;color:var(--text2);font-size:12px">+秒</div><input class="inp-num" style="width:58px;height:34px" type="number" min="0" max="99" value="${FS.delayGaps[i]||0}" onchange="fSetDelayGap(${i},this.value)">`}
+        ${i===0?'':renderDelayGapStepper(i)}
       </div>
       <div style="font-size:11px;color:var(--text3);padding-left:66px">${fDelayGetMembersForSlot(i).map(m=>m.name).join('、')||'該当メンバーなし'}</div>
     </div>`).join('')}
@@ -887,8 +895,8 @@ function renderDelayCustomTeamSettings(ac){
   return `<div style="display:grid;gap:8px">
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
       <div style="font-size:12px;color:var(--text2);font-weight:800;margin-bottom:8px">発目ごとの間隔</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        ${[1,2,3].map(i=>`<div><div style="font-size:10px;color:var(--text3);margin-bottom:3px">${fDelayHitLabel(i)} +秒</div><input class="inp-num" style="width:100%;height:34px" type="number" min="0" max="99" value="${FS.delayGaps[i]||0}" onchange="fSetDelayGap(${i},this.value)"></div>`).join('')}
+      <div style="display:grid;grid-template-columns:1fr;gap:8px">
+        ${[1,2,3].map(i=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px"><div style="font-size:12px;color:var(--text2);font-weight:800">${fDelayHitLabel(i)} 間隔</div>${renderDelayGapStepper(i)}</div>`).join('')}
       </div>
     </div>
     ${ac.length?ac.map(m=>`<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
@@ -918,7 +926,7 @@ function renderDelayResult(rows){
 function renderDelayMixedList(rows){
   const mixed=[...rows].sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
   return `<div style="background:rgba(6,13,26,.58);border:1px solid rgba(227,179,65,.28);border-radius:10px;padding:10px;margin-top:10px">
-    <div style="font-size:12px;font-weight:900;color:#f7d774;margin-bottom:6px">ディレイ混同一覧</div>
+    <div style="font-size:12px;font-weight:900;color:#f7d774;margin-bottom:6px">ディレイVC読み上げ一覧</div>
     ${mixed.map(r=>`<div style="display:flex;align-items:center;padding:7px 0;border-top:1px solid var(--border)">
       <div style="flex:1"><span style="font-size:12px;color:#f7d774;font-weight:900">【${fDelayHitLabel(r.slot)}】</span><span class="chip" data-t="${r.team}" style="margin-left:6px">${r.team}</span><span style="font-size:14px;font-weight:700;margin-left:6px">${r.member.name}</span></div>
       <div style="font-size:26px;font-weight:900;color:var(--text);line-height:1">${r.count}<span style="font-size:10px;color:var(--text3);margin-left:3px">count</span></div>
@@ -950,7 +958,7 @@ function buildFrostDelayGroupCopyText(rows){
 }
 function buildFrostDelayMixedCopyText(rows){
   if(!rows.length)return'';
-  const out=['【霜竜ディレイ混同】'];
+  const out=['【霜竜ディレイVC読み上げ】'];
   const mixed=[...rows].sort((a,b)=>b.count-a.count||a.slot-b.slot||a.member.name.localeCompare(b.member.name,'ja'));
   mixed.forEach(r=>out.push(`【${fDelayHitLabel(r.slot)}】${r.member.name} ${r.count}`));
   return out.join('\n');
@@ -1046,9 +1054,22 @@ ${chunks.map((chunk,i)=>`<div class="card" style="margin-top:10px"><div class="s
   <div class="cpbox" id="cp-c${i}">${makeTeamText(chunk)||'(なし)'}</div>
   <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-c${i}').textContent)">コピー（${i+1}回目）</button>
 </div>`).join('')}
+${renderFrostDelayCopyPageCard()}
 ${renderWhUI('frost')}
 ${renderGameChatUI('frost')}`;
   renderWhList();
+}
+
+function renderFrostDelayCopyPageCard(){
+  const rows=fDelayRows();
+  if(!rows.length)return `<div class="card" style="margin-top:10px;border-color:rgba(227,179,65,.35)"><div class="sec">ディレイ結果コピー</div><div class="empty">ディレイ計算後に表示されます</div></div>`;
+  const mode=FS.delayCopyMode||'group';
+  const text=mode==='mixed'?buildFrostDelayMixedCopyText(rows):buildFrostDelayGroupCopyText(rows);
+  return `<div class="card" style="margin-top:10px;border-color:rgba(227,179,65,.5);background:linear-gradient(180deg,rgba(58,42,10,.28),rgba(13,24,41,.98));"><div class="sec">ディレイ結果コピー</div>
+    <div class="seg2" style="margin-bottom:8px"><div class="sbtn ${mode==='group'?'on-blue':''}" onclick="fSetDelayCopyMode('group')">発目別コピー</div><div class="sbtn ${mode==='mixed'?'on-blue':''}" onclick="fSetDelayCopyMode('mixed')">VC読み上げコピー</div></div>
+    <div class="cpbox" id="cp-delay">${text}</div>
+    <button class="btn btn-primary btn-sm" onclick="cp(document.getElementById('cp-delay').textContent)">ディレイ結果コピー</button>
+  </div>`;
 }
 
 function rFrostEnemy(el){
@@ -1595,8 +1616,8 @@ const _r=render;
 window.render=function(){_r();saveAll();};
 
 setInterval(()=>{
-  const e=document.getElementById('sticky-clock-time');
-  if(e){const n=new Date();e.textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;}
+  const e=document.getElementById('hdr-clock');
+  if(e)e.textContent=`🕒 ${formatClock()}`;
 },1000);
 
 setInterval(()=>{
